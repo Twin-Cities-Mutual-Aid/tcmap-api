@@ -1,11 +1,8 @@
 const Airtable = require('airtable');
 require('dotenv').config();
 
-
 const apiKey = process.env.AIRTABLE_API_KEY
 const baseName = process.env.AIRTABLE_BASE_NAME
-
-// ^ Configure Airtable using values in 🗝.env
 const base = new Airtable({apiKey: apiKey}).base(baseName);
 
 
@@ -16,7 +13,6 @@ const Bottleneck = require('bottleneck');
 const rateLimiter = new Bottleneck({
   minTime: 1050 / 5
 }) // ~5 requests per second
-
 
 prepareResult = function(record) {
 	return {
@@ -52,8 +48,6 @@ validateRecord = function(record) {
 	return has_org && has_lng && has_lat && has_color
 }
 
-
-
 const cache = require('./caching');
 
 function sendResultWithResponse(result, response) {
@@ -61,12 +55,12 @@ function sendResultWithResponse(result, response) {
 }
 
 function cachePathForRequest(request) {
-  return '.newcache' + request.path + '.json';  
+  return '.cache' + request.path + '.json';  
 }
 
 module.exports = {
 
-  handleAIListRequest: function(request, response) {
+  getMutualAidSites: function(request, response) {
     
     var cachePath = cachePathForRequest(request);
     
@@ -77,54 +71,18 @@ module.exports = {
       sendResultWithResponse(cachedResult, response);
     }
     else {
-      
       console.log("Cache miss. Loading from Airtable for " + request.path);
-
-      var pageNumber = 0;
-
-      console.log("here")
-      // rateLimiter.wrap(base(tableName).select().eachPage(function page(records, fetchNextPage) {
-      //   console.log("in each page")
-      //   if (pageNumber == request.params.page) {
-
-      //     var results = [];
-
-      //     records.forEach(function(record) {
-            
-      //       var result = {
-      //       //   name: record.get('org_name'),
-      //         name: record.fields.org_name
-      //       }
-      //       results.push(result);
-      //     });
-      //     cache.writeCacheWithPath(cachePath, results);
-      //     console.log("Returning records");
-      //     sendResultWithResponse(results, response);
-
-      //   } else {
-      //     pageNumber++;
-      //     fetchNextPage();
-      //   }
-
-      // }, function done(error) {
-			// 	console.log(error)
-			// 	sendResultWithResponse([], response);
-      // }));
-
-
+			
 			const field = 'org_name'
 			const direction = 'asc'
 			const query = {
 				sort: [{field, direction}],
 			}
+
       rateLimiter.wrap(base('mutual_aid_locations')
         .select(query)
         .all()
         .then( function(records) {
-					console.log("in base call")
-					// return records
-					// 	.filter(validateRecord)
-					// 	.map(prepareResult)
 					results = records
 						.filter(validateRecord)
 						.map(prepareResult)

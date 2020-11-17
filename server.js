@@ -1,20 +1,16 @@
-// init project
 const express = require('express');
 const app = express();
+const airtable = require('./airtable-api');
 
-// API route to list rows from Airtable:
-
-const connection = require('./airtable-api');
-
-app.get("/api/ai/list/:page", function(request, response) {
-  console.log("Handling AI list API request");
-  connection.handleAIListRequest(request, response);
+app.get("/mutual_aid_sites", function(request, response) {
+  console.log("Handling mutual aid sites API request");
+  airtable.getMutualAidSites(request, response);
 });
 
-app.get("/api*", function(request, response) {
+app.get("/*", function(request, response) {
   
   const responseObject = {
-    Error : "Invalid path"
+    error : "Invalid path"
   }
   
   response.status(400).end(JSON.stringify(responseObject));
