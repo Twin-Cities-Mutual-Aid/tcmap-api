@@ -1,4 +1,6 @@
 const Airtable = require('airtable');
+require('dotenv').config();
+
 
 const apiKey = process.env.AIRTABLE_API_KEY
 const baseName = process.env.AIRTABLE_BASE_NAME
