@@ -1,24 +1,27 @@
 const express = require('express');
 const app = express();
-const airtable = require('./airtable-api');
+const siteService = require('./siteService');
 
 app.use((req, res, next) => {
 	res.header('Access-Control-Allow-Origin', '*');
 	next();
 });
 
-app.get("/mutual_aid_sites", function(request, response) {
+app.get("/v1/mutual_aid_sites", function(request, response) {
   console.log("Handling mutual aid sites API request");
-  airtable.getMutualAidSites(request, response);
+  siteService.getMutualAidSites(request.path)
+    .then((result) =>
+      response.status(200).end(JSON.stringify(result))
+    )
 });
 
 app.get("/*", function(request, response) {
   
   const responseObject = {
-    error : "Invalid path"
+    error : "Path not found"
   }
   
-  response.status(400).end(JSON.stringify(responseObject));
+  response.status(404).end(JSON.stringify(responseObject));
 });
 
 app.listen(process.env.PORT || 3000, 

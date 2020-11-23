@@ -3,9 +3,8 @@
 // fs allows us to read or write to a file for caching
 const fs = require('fs');
 
-
 // If the cache is less than this many minutes old, serve it
-var cacheInterval = 60 * 1; //1 minute
+var cacheInterval = 60 * 1; // 1 minute
 
 module.exports = {
   
@@ -13,7 +12,11 @@ module.exports = {
     cacheInterval = interval;
   },
 
-  writeCacheWithPath: function(path, object) {
+  getCachePath: function(requestPath) {
+    return '.cache' + requestPath + '.json';  
+  },
+
+  writeCache: function(path, object) {
     var pathComponents = path.split("/");
     var intermediatePath = "";
     
@@ -34,7 +37,7 @@ module.exports = {
     
   },
 
-  readCacheWithPath: function(path) {
+  readCache: function(path) {
     var shouldSendCache = false;
 
     if (fs.existsSync(path)) {
