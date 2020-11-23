@@ -29,7 +29,10 @@ module.exports = {
 		}
 
 		const wrappedAirtableCall = rateLimiter.wrap(fetchRecords);
-		const result = await wrappedAirtableCall(query);
+		const result = await wrappedAirtableCall(query)
+			.catch((error) => {
+				throw new Error("Error fetching Airtable records" + error)
+		  });
 
 		return result
 	}

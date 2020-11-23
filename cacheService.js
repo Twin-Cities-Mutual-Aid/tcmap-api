@@ -51,6 +51,10 @@ module.exports = {
     if (!shouldSendCache) return null;
     else return JSON.parse(fs.readFileSync(path, 'utf8'));
 
+  },
+
+  readCacheBypassInterval: function(path) {
+    return JSON.parse(fs.readFileSync(path, 'utf8'));
   }
 
 }

@@ -47,6 +47,11 @@ module.exports = {
 			return cachedResult
 		} else {
 			const siteRecords = await airtableClient.getMutualAidSites()
+				.catch( e => {
+					console.error("There was an error getting mutual aid sites: " + e.message)
+					// TODO: Send slack? alert so there's visibility into the error!!
+					return cacheService.readCacheBypassInterval
+				})
 			const result = siteRecords
 					.filter(validateRecord)
 					.map(mapRecordFields)
