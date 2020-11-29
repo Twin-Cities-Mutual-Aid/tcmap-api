@@ -57,6 +57,8 @@ If you're ready to start contributing:
 * Express
 * Airtable
 * Bottleneck
+* Heroku - Deployment pipeline
+* <Testing framework to come>
 
 ## Environment Variables
 
