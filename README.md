@@ -1,32 +1,42 @@
 # TCMAP API
-This is the backend API that serves json data from Airtable to the TCMAP UI - a webapp to coordinate aid and care in the Twin Cities. https://twin-cities-mutual-aid.org/
-This API uses file-based caching to limit the requests to the Airtable API. Airtable's rate limit is five requests per second per base. Anything more than that and the API will lock down for thirty seconds. By implementing caching and using [Bottleneck](https://www.npmjs.com/package/bottleneck) for rate limiting, we can control the number of requests sent to Airtable and prevent the db lockdown.
+
+This is the backend API that serves json data from Airtable to the [TCMAP UI](https://twin-cities-mutual-aid.org/) - a webapp to coordinate aid and care in the Twin Cities.
+This API uses file-based caching and [Bottleneck](https://www.npmjs.com/package/bottleneck) to limit the requests to the Airtable API. Airtable's rate limit is five requests per second per base. Anything more than that and the API will lock down for thirty seconds. By implementing caching and rate limiting, we can control the number of requests sent to Airtable and prevent the db lockdown.
 
 ## About the project
+
 For more details on the Twin Cities Mutual Aid Project and getting involved, view [the website README](https://github.com/Twin-Cities-Mutual-Aid/twin-cities-aid-distribution-locations#about-the-project).
 
 ## Feature requests & feedback
-We're using [Github Issues](https://github.com/Twin-Cities-Mutual-Aid/twin-cities-aid-distribution-locations/issues) to manage tasks, and have a [kanban board](https://github.com/orgs/Twin-Cities-Mutual-Aid/projects/1) set up. If you'd like access to the kanban board reach out in the [OTC slack channel](https://otc-slackin.herokuapp.com/). 
+
+We're using [Github Issues](https://github.com/Twin-Cities-Mutual-Aid/twin-cities-aid-distribution-locations/issues) to manage tasks, and have a [kanban board](https://github.com/orgs/Twin-Cities-Mutual-Aid/projects/1) set up. If you'd like access to the kanban board reach out in the [OTC slack channel](https://otc-slackin.herokuapp.com/).
 
 If you've got a feature request or feedback to share on the website or backend, feel free to [submit an issue](https://github.com/Twin-Cities-Mutual-Aid/twin-cities-aid-distribution-locations/issues/new) on GH issues, or bring it up in slack.
 
 ## How does TCMAP API work?
+
 Four files make up the api:
 
-#### server.js
-This is the entrypoint of the app which has the api endpoints defined. 
+### server.js
+
+This is the entrypoint of the app which has the api endpoints defined.
+
 * /v1/mutual_aid_sites
 * /health
 
-#### siteService.js
+### siteService.js
+
 This is the service layer which calls either the cacheService or the airtableClient to get the mutual aid site data. This service also handles business logic, data validation, and data mapping.
 
-#### cacheService.js
-Manages reading and writing json files from local storage to ease load on Airtable rate limit
-* `readCache(path)` returns cached json data if not too stale. Change `cacheInterval` to adjust.
-* `writeCache(path, object)` writes a JavaScript object to JSON at the specified path, creating intermediate directories as needed.
+### cacheService.js
 
-#### airtableClient.js
+Manages reading and writing json files from local storage to ease load on Airtable rate limit
+
+* `readCache(path)` – returns cached json data if not too stale. Change `cacheInterval` to adjust.
+* `writeCache(path, object)` – writes a JavaScript object to JSON at the specified path, creating intermediate directories as needed.
+
+### airtableClient.js
+
 Client which uses the [airtable.js library](https://github.com/airtable/airtable.js/) to connect to TCMAP base and returns the results as a JSON response.
 
 [Bottleneck](https://www.npmjs.com/package/bottleneck) handles rate limiting. The Airtable database interactions are handled using Bottleneck's wrap function.
@@ -35,14 +45,17 @@ Base ID and Airtable API key are in 🗝.env.
 
 For more on accessing Airtable via the API, see the [interactive Airtable documentation](https://airtable.com/api).
 
-
 ## Run locally
+
 1. Create `.env` file with required values (see `Environment Variable` section below)
-2. Run this command from the project directory: `node server.js`
-3. Open browser and go to url: `http://localhost:3000/v1/mutual_aid_sites`. You should see json of mutual aid site data in browser window. 
+2. Run `npm install`
+3. Run this command from the project directory: `node server.js`
+4. Open browser and go to url: `http://localhost:3000/v1/mutual_aid_sites`. You should see json of mutual aid site data in browser window.
 
 ## Contributions
+
 If you're ready to start contributing:
+
 1. Reach out to **#tc-aid-dev** channel in the Open Twin Cities Slack or **#dragon-riders** channel in Twin Cities Mutual Aid Project Slack and ask to be added to the **Developers** team for the Twin-Cities-Mutual-Aid Github organization. This will give you access to create branches and push to a clone of the tcmap-api repo and will give you read access to the [secrets](https://github.com/Twin-Cities-Mutual-Aid/secrets) repo for local environment variables.
 2. Clone down the repo - be sure to clone and not fork. Our current CI/CD solution (TravisCI) cannot inject environment variables to forks so any PRs submitted from a fork will have failing tests.
 3. Take a look at the Kanban board, assign yourself to an issue, and pull it into **In Progress**. Issues on the Kanban board tagged with **Ready To Go** or **Good First Issue** are good ones to start with.
@@ -53,22 +66,27 @@ If you're ready to start contributing:
 8. When your code has been approved, squash & merge the code.
 
 ## Tech Stack
-* Node 
+
+* Node
 * Express
 * Airtable
 * Bottleneck
+* Heroku - Deployment pipeline
+* [Testing framework to come]
 
 ## Environment Variables
 
-The application uses [environmental variables](https://en.wikipedia.org/wiki/Environment_variable) to inject secrets into app and manage configuration between environments. These values are set in a `.env` file in the project root directory. 
+The application uses [environmental variables](https://en.wikipedia.org/wiki/Environment_variable) to inject secrets into app and manage configuration between environments. These values are set in a `.env` file in the project root directory.
 
 To set up a `.env`, copy the `.env.example` file, which lists needed configuration values. For example, in the Mac OS terminal:
+
 ```bash
 cp .env.example .env
 ```
 
 A set variable in the `.env` file will look like this:
-```
+
+```env
 AIRTABLE_API_KEY=1234
 ```
 
@@ -82,4 +100,4 @@ If you need to introduce a new environmental variable, please coordinate with de
 
 ## Code of Conduct
 
-Contributors to the project are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md). 
+Contributors to the project are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
