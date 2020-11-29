@@ -13,7 +13,7 @@ We're using [Github Issues](https://github.com/Twin-Cities-Mutual-Aid/twin-citie
 
 If you've got a feature request or feedback to share on the website or backend, feel free to [submit an issue](https://github.com/Twin-Cities-Mutual-Aid/twin-cities-aid-distribution-locations/issues/new) on GH issues, or bring it up in slack.
 
-## How does TCMAP API work?
+## How TCMAP API works
 
 Four files make up the api:
 
