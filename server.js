@@ -15,6 +15,10 @@ app.get("/v1/mutual_aid_sites", function(request, response) {
     )
 });
 
+app.get("/health", function(request, response) {
+  response.status(200).end("Ok")
+})
+
 app.get("/*", function(request, response) {
   
   const responseObject = {
