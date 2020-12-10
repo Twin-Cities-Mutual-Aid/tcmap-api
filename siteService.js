@@ -25,7 +25,7 @@ module.exports = {
 			return result
 		}
 	}
-	
+
 }
 
 validateRecord = function(record) {
@@ -69,7 +69,7 @@ transformHours = function(time) {
 		var hours = time[0] + time[1]
 		const ampm = hours >= 12 ? "pm" : "am"
 		hours = (hours % 12) || 12
-		return "${hours}:${minutes} ${ampm}"
+		return `${hours}:${minutes} ${ampm}`
 	} else {
 		return time
 	}
