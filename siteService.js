@@ -55,6 +55,8 @@ mapRecordFields = function(record) {
 		urgentNeed: record.fields.urgent_need,
 		seekingMoney: record.fields.seeking_money,
 		seekingMoneyURL: record.fields.seeking_money_url,
+		noIdNeeded: record.fields.no_id_needed,
+		someInfoRequired: record.fields.some_info_required,
 		warmingSite: record.fields.warming_site,
 		accepting: record.fields.accepting,
 		notAccepting: record.fields.not_accepting,
