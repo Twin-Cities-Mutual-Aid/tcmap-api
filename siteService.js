@@ -58,6 +58,7 @@ mapRecordFields = function(record) {
 		noIdNeeded: record.fields.no_id_needed,
 		someInfoRequired: record.fields.some_info_required,
 		warmingSite: record.fields.warming_site,
+		busRoutes: transformBusRoutes(record.fields.bus_routes),
 		accepting: record.fields.accepting,
 		notAccepting: record.fields.not_accepting,
 		seekingVolunteers: record.fields.seeking_volunteers,
@@ -78,3 +79,18 @@ transformHours = function(time) {
 	}
 }
 
+transformBusRoutes = function(busRoutes) {
+	return busRoutes ?  getBusRoutes(busRoutes) : undefined
+}
+
+getBusRoutes = function(busRoutes) {
+	let routes = []
+	busRoutes.forEach(function(busRoute) {
+		const routeId = busRoute.substring(0, busRoute.indexOf("("))
+		const distance = busRoute.substring(busRoute.indexOf("("))
+		const route = { routeId: routeId, distance: distance }
+		routes.push(route)
+	})
+	return routes
+
+}
