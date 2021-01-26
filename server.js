@@ -7,18 +7,9 @@ app.use((req, res, next) => {
 	next();
 });
 
-// app.get("/v1/mutual_aid_sites", function(request, response) {
-//   console.log("Handling mutual aid sites API request");
-//   siteService.getMutualAidSites(request.path)
-//     .then((result) =>
-//       response.status(200).end(JSON.stringify(result))
-//     )
-// });
-
 app.get("/v1/mutual_aid_sites", function(request, response) {
   console.log("Handling mutual aid sites API request");
-  const type = request.query.type
-  siteService.getMutualAidSites(request.path, type)
+  siteService.getMutualAidSites(request.path)
     .then((result) =>
       response.status(200).end(JSON.stringify(result))
     )
