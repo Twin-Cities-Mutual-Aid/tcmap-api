@@ -1,6 +1,16 @@
 
-const airtableClient = require('./airtableClient');
+const airtableClient = require('../airtableClient');
 const cacheService = require('./cacheService');
+const PublicTransitEnum = require('../domain/PublicTransitEnum')
+
+const LIGHTRAIL_ICON = "tram"
+const BUS_ICON = "directions_bus"
+const BLUELINE = "BLUELINE"
+const GREENLINE = "GREENLINE"
+const BUS = "BUS"
+const PURPLE = "#771473"
+const BLUE = "#0055A5"
+const GREEN = "#00B100"
 
 module.exports = {
 
@@ -16,7 +26,7 @@ module.exports = {
 				.catch( e => {
 					console.error("There was an error getting mutual aid sites: " + e.message)
 					// TODO: Send slack? alert so there's visibility into the error!!
-					return cacheService.readCacheBypassInterval
+					return cacheService.readCacheBypassInterval(cachePath)
 				})
 			const result = siteRecords
 					.filter(validateRecord)
@@ -58,7 +68,7 @@ mapRecordFields = function(record) {
 		noIdNeeded: record.fields.no_id_needed,
 		someInfoRequired: record.fields.some_info_required,
 		warmingSite: record.fields.warming_site,
-		busRoutes: transformBusRoutes(record.fields.bus_routes),
+		publicTransitOptions: transformPublicTransit(record.fields.public_transit),
 		accepting: record.fields.accepting,
 		notAccepting: record.fields.not_accepting,
 		seekingVolunteers: record.fields.seeking_volunteers,
@@ -79,18 +89,35 @@ transformHours = function(time) {
 	}
 }
 
-transformBusRoutes = function(busRoutes) {
-	return busRoutes ?  getBusRoutes(busRoutes) : undefined
+transformPublicTransit = function(publicTransitOptions) {
+	return publicTransitOptions ? getPublicTransit(publicTransitOptions) : undefined
 }
 
-getBusRoutes = function(busRoutes) {
-	let routes = []
-	busRoutes.forEach(function(busRoute) {
-		const routeId = busRoute.substring(0, busRoute.indexOf("("))
-		const distance = busRoute.substring(busRoute.indexOf("("))
-		const route = { routeId: routeId, distance: distance }
-		routes.push(route)
-	})
-	return routes
+getPublicTransit = function(publicTransitOptions) {
+	let options = []
+	if(publicTransitOptions) {
+		publicTransitOptions.forEach(function(transitOption) {
+			const properties = transitOption.split("-")
+			const route = getTransitOption(properties)
+			options.push(route)
+		})
+	}
+	return options
+}
 
+getTransitOption = function(properties) {
+	const routeName = properties[0]
+	const type = properties[1]
+	const distance = properties[2]
+
+	switch(type) {
+		case BLUELINE:
+			return { routeName: routeName, backgroundColor: BLUE, icon: LIGHTRAIL_ICON, distance: distance }
+		case GREENLINE:
+			return { routeName: routeName, backgroundColor: GREEN, icon: LIGHTRAIL_ICON, distance: distance }
+		case BUS:
+			return { routeName: routeName, backgroundColor: PURPLE, icon: BUS_ICON, distance: distance }
+		default:
+			return ""
+	}
 }
