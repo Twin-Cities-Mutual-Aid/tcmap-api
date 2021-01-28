@@ -1,7 +1,6 @@
 
-const airtableClient = require('../airtableClient');
-const cacheService = require('./cacheService');
-const PublicTransitEnum = require('../domain/PublicTransitEnum')
+const airtableClient = require('../airtableClient')
+const cacheService = require('./cacheService')
 
 const LIGHTRAIL_ICON = "tram"
 const BUS_ICON = "directions_bus"
@@ -34,6 +33,10 @@ module.exports = {
 			cacheService.writeCache(cachePath, result);
 			return result
 		}
+	},
+
+	transformPublicTransit: function(publicTransitOptions) {
+		return publicTransitOptions ? getPublicTransit(publicTransitOptions) : undefined
 	}
 
 }
@@ -89,17 +92,23 @@ transformHours = function(time) {
 	}
 }
 
-transformPublicTransit = function(publicTransitOptions) {
-	return publicTransitOptions ? getPublicTransit(publicTransitOptions) : undefined
-}
 
+
+/**
+ *  Formats the list of public transit options
+ * 
+ *  @param {array} publicTransitOptions - The list of public transit options, each in the format [name/#]-[BLUELINE/GREENLINE/BUS]-([#] blocks)
+ */
 getPublicTransit = function(publicTransitOptions) {
 	let options = []
 	if(publicTransitOptions) {
 		publicTransitOptions.forEach(function(transitOption) {
-			const properties = transitOption.split("-")
-			const route = getTransitOption(properties)
-			options.push(route)
+			// matches regex for a hyphen to check that transit option has at least two hyphens
+			if((transitOption.match(/-/g) || []).length > 1) {
+				const properties = transitOption.split("-")
+				const route = getTransitOption(properties)
+				options.push(route)
+			}
 		})
 	}
 	return options
