@@ -1,6 +1,15 @@
 
-const airtableClient = require('./airtableClient');
-const cacheService = require('./cacheService');
+const airtableClient = require('../airtableClient')
+const cacheService = require('./cacheService')
+
+const LIGHTRAIL_ICON = "tram"
+const BUS_ICON = "directions_bus"
+const BLUELINE = "BLUELINE"
+const GREENLINE = "GREENLINE"
+const BUS = "BUS"
+const PURPLE = "#771473"
+const BLUE = "#0055A5"
+const GREEN = "#00B100"
 
 module.exports = {
 
@@ -16,7 +25,7 @@ module.exports = {
 				.catch( e => {
 					console.error("There was an error getting mutual aid sites: " + e.message)
 					// TODO: Send slack? alert so there's visibility into the error!!
-					return cacheService.readCacheBypassInterval
+					return cacheService.readCacheBypassInterval(cachePath)
 				})
 			const result = siteRecords
 					.filter(validateRecord)
@@ -24,6 +33,10 @@ module.exports = {
 			cacheService.writeCache(cachePath, result);
 			return result
 		}
+	},
+
+	transformPublicTransit: function(publicTransitOptions) {
+		return publicTransitOptions ? getPublicTransit(publicTransitOptions) : undefined
 	}
 
 }
@@ -58,6 +71,7 @@ mapRecordFields = function(record) {
 		noIdNeeded: record.fields.no_id_needed,
 		someInfoRequired: record.fields.some_info_required,
 		warmingSite: record.fields.warming_site,
+		publicTransitOptions: transformPublicTransit(record.fields.public_transit),
 		accepting: record.fields.accepting,
 		notAccepting: record.fields.not_accepting,
 		seekingVolunteers: record.fields.seeking_volunteers,
@@ -78,3 +92,41 @@ transformHours = function(time) {
 	}
 }
 
+
+
+/**
+ *  Formats the list of public transit options
+ * 
+ *  @param {array} publicTransitOptions - The list of public transit options, each in the format [name/#]-[BLUELINE/GREENLINE/BUS]-([#] blocks)
+ */
+getPublicTransit = function(publicTransitOptions) {
+	let options = []
+	if(publicTransitOptions) {
+		publicTransitOptions.forEach(function(transitOption) {
+			// matches regex for a hyphen to check that transit option has at least two hyphens
+			if((transitOption.match(/-/g) || []).length > 1) {
+				const properties = transitOption.split("-")
+				const route = getTransitOption(properties)
+				options.push(route)
+			}
+		})
+	}
+	return options
+}
+
+getTransitOption = function(properties) {
+	const routeName = properties[0]
+	const type = properties[1]
+	const distance = properties[2]
+
+	switch(type) {
+		case BLUELINE:
+			return { routeName: routeName, backgroundColor: BLUE, icon: LIGHTRAIL_ICON, distance: distance }
+		case GREENLINE:
+			return { routeName: routeName, backgroundColor: GREEN, icon: LIGHTRAIL_ICON, distance: distance }
+		case BUS:
+			return { routeName: routeName, backgroundColor: PURPLE, icon: BUS_ICON, distance: distance }
+		default:
+			return ""
+	}
+}

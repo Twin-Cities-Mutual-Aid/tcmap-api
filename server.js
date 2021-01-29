@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const siteService = require('./siteService');
+const siteService = require('./service/siteService');
 
 app.use((req, res, next) => {
 	res.header('Access-Control-Allow-Origin', '*');
