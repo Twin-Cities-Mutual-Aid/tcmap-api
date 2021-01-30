@@ -1,7 +1,9 @@
+const airtableMock = require('airtable')
 const airtableClientMock = require('../airtableClient')
 const cacheServiceMock = require('./cacheService')
 const siteService = require('./siteService')
 
+jest.mock('airtable')
 jest.mock('../airtableClient')
 jest.mock('./cacheService')
 
