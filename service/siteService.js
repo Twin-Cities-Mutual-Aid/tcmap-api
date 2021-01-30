@@ -113,11 +113,12 @@ getPublicTransit = function(publicTransitOptions) {
 			if((transitOption.match(/-/g) || []).length > 1) {
 				const properties = transitOption.split("-")
 				const route = getTransitOption(properties)
-				options.push(route)
+				if (route) options.push(route)
 			}
 		})
 	}
-	return options
+	if (options.length > 0) return options
+	return 
 }
 
 getTransitOption = function(properties) {
@@ -133,6 +134,6 @@ getTransitOption = function(properties) {
 		case BUS:
 			return { routeName: routeName, backgroundColor: PURPLE, icon: BUS_ICON, distance: distance }
 		default:
-			return ""
+			return
 	}
 }
