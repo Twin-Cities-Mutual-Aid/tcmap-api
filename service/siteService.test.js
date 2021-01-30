@@ -2,6 +2,8 @@ const Airtable = require('airtable')
 
 const siteService = require('./siteService')
 
+// import { transformPublicTransit } from "./siteService"
+
 describe("siteService tests", () => {
     test('transforming list of public transit option strings returns list of publicTransitOption objects', () => {
         let result = siteService.transformPublicTransit([ "89-BUS-(3 blocks)", "Blue-BLUELINE-(2 blocks)", "Green-GREENLINE-(4 blocks)" ])
