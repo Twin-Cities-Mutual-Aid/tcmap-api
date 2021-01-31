@@ -52,6 +52,10 @@ For more on accessing Airtable via the API, see the [interactive Airtable docume
 3. Run this command from the project directory: `node server.js`
 4. Open browser and go to url: `http://localhost:3000/v1/mutual_aid_sites`. You should see json of mutual aid site data in browser window.
 
+## Run tests
+
+Run `npm test`
+
 ## Contributions
 
 If you're ready to start contributing:
@@ -72,7 +76,8 @@ If you're ready to start contributing:
 * Airtable
 * Bottleneck
 * Heroku - Deployment pipeline
-* [Testing framework to come]
+* Jest testing
+* TravisCI
 
 ## Environment Variables
 

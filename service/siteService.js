@@ -15,29 +15,33 @@ module.exports = {
 
 	getMutualAidSites: async function(requestPath) {
 		const cachePath = cacheService.getCachePath(requestPath);
-		const cachedResult = cacheService.readCache(cachePath);
+		const cachedResult = cacheService.readCache(cachePath, false);
 
-		if (cachedResult != null) {
-			console.log("Cache hit. Returning cached result for " + requestPath);
-			return cachedResult
-		} else {
-			const siteRecords = await airtableClient.getMutualAidSites()
-				.catch( e => {
-					console.error("There was an error getting mutual aid sites: " + e.message)
-					// TODO: Send slack? alert so there's visibility into the error!!
-					return cacheService.readCacheBypassInterval(cachePath)
-				})
-			const result = siteRecords
-					.filter(validateRecord)
-					.map(mapRecordFields)
-			cacheService.writeCache(cachePath, result);
-			return result
+		try {
+			if (cachedResult != null) {
+				console.log("Cache hit. Returning cached result for " + requestPath);
+				return cachedResult
+			} else {
+				const siteRecords = await airtableClient.getMutualAidSites()
+					.catch( e => {
+						console.error("There was an error getting mutual aid sites: " + e.message)
+						// TODO: Send slack? alert so there's visibility into the error!!
+						return cacheService.readCache(cachePath, true);
+					})
+				const result = siteRecords
+						.filter(validateRecord)
+						.map(mapRecordFields)
+				cacheService.writeCache(cachePath, result);
+				return result
+			}
+		} catch (e) {
+			console.error("There was an error mapping mutual aid sites, returning cached data. Error is: " + e.message)
+			// TODO: Send slack? alert so there's visibility into the error!!
+			return cacheService.readCache(cachePath, true);
 		}
 	},
 
-	transformPublicTransit: function(publicTransitOptions) {
-		return publicTransitOptions ? getPublicTransit(publicTransitOptions) : undefined
-	}
+	transformPublicTransit: transformPublicTransit,
 
 }
 
@@ -92,7 +96,9 @@ transformHours = function(time) {
 	}
 }
 
-
+function transformPublicTransit(publicTransitOptions) {
+	return publicTransitOptions ? getPublicTransit(publicTransitOptions) : undefined
+}
 
 /**
  *  Formats the list of public transit options
@@ -107,11 +113,11 @@ getPublicTransit = function(publicTransitOptions) {
 			if((transitOption.match(/-/g) || []).length > 1) {
 				const properties = transitOption.split("-")
 				const route = getTransitOption(properties)
-				options.push(route)
+				if (route) options.push(route)
 			}
 		})
 	}
-	return options
+	return options.length > 0 ? options : undefined
 }
 
 getTransitOption = function(properties) {
@@ -127,6 +133,6 @@ getTransitOption = function(properties) {
 		case BUS:
 			return { routeName: routeName, backgroundColor: PURPLE, icon: BUS_ICON, distance: distance }
 		default:
-			return ""
+			return
 	}
 }
