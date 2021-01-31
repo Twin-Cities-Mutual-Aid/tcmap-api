@@ -78,7 +78,6 @@ If you're ready to start contributing:
 * Heroku - Deployment pipeline
 * Jest testing
 * TravisCI
-* [Testing framework to come]
 
 ## Environment Variables
 

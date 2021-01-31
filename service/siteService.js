@@ -15,7 +15,7 @@ module.exports = {
 
 	getMutualAidSites: async function(requestPath) {
 		const cachePath = cacheService.getCachePath(requestPath);
-		const cachedResult = cacheService.readCache(cachePath);
+		const cachedResult = cacheService.readCache(cachePath, false);
 
 		try {
 			if (cachedResult != null) {
@@ -26,7 +26,7 @@ module.exports = {
 					.catch( e => {
 						console.error("There was an error getting mutual aid sites: " + e.message)
 						// TODO: Send slack? alert so there's visibility into the error!!
-						return cacheService.readCacheBypassInterval(cachePath)
+						return cacheService.readCache(cachePath, true);
 					})
 				const result = siteRecords
 						.filter(validateRecord)
@@ -37,7 +37,7 @@ module.exports = {
 		} catch (e) {
 			console.error("There was an error mapping mutual aid sites, returning cached data. Error is: " + e.message)
 			// TODO: Send slack? alert so there's visibility into the error!!
-			return cacheService.readCacheBypassInterval(cachePath)
+			return cacheService.readCache(cachePath, true);
 		}
 	},
 
@@ -117,8 +117,7 @@ getPublicTransit = function(publicTransitOptions) {
 			}
 		})
 	}
-	if (options.length > 0) return options
-	return 
+	return options.length > 0 ? options : undefined
 }
 
 getTransitOption = function(properties) {

@@ -37,10 +37,13 @@ module.exports = {
     
   },
 
-  readCache: function(path) {
+  readCache: function(path, ignoreFreshness) {
     var shouldSendCache = false;
 
     if (fs.existsSync(path)) {
+      if (ignoreFreshness) {
+        return JSON.parse(fs.readFileSync(path, 'utf8'));
+      }
       var cachedTime = fs.statSync(path).ctime;
 
       if ((new Date().getTime() / 1000.0 - cachedTime / 1000.0) < cacheInterval) {
@@ -51,10 +54,6 @@ module.exports = {
     if (!shouldSendCache) return null;
     else return JSON.parse(fs.readFileSync(path, 'utf8'));
 
-  },
-
-  readCacheBypassInterval: function(path) {
-    return JSON.parse(fs.readFileSync(path, 'utf8'));
   }
 
 }
