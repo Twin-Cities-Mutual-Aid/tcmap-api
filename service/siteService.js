@@ -96,10 +96,6 @@ transformHours = function(time) {
 	}
 }
 
-getTodayInHhmmFormat = function() {
-
-}
-
 function transformPublicTransit(publicTransitOptions) {
 	return publicTransitOptions ? getPublicTransit(publicTransitOptions) : undefined
 }
