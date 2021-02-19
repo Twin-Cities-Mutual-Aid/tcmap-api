@@ -96,6 +96,10 @@ transformHours = function(time) {
 	}
 }
 
+getTodayInHhmmFormat = function() {
+
+}
+
 function transformPublicTransit(publicTransitOptions) {
 	return publicTransitOptions ? getPublicTransit(publicTransitOptions) : undefined
 }
@@ -127,11 +131,11 @@ getTransitOption = function(properties) {
 
 	switch(type) {
 		case BLUELINE:
-			return { routeName: routeName, backgroundColor: BLUE, icon: LIGHTRAIL_ICON, distance: distance }
+			return { routeName: routeName, backgroundColor: BLUE, icon: LIGHTRAIL_ICON, distance: distance, altText: `${BLUELINE} light rail, ${distance} away` }
 		case GREENLINE:
-			return { routeName: routeName, backgroundColor: GREEN, icon: LIGHTRAIL_ICON, distance: distance }
+			return { routeName: routeName, backgroundColor: GREEN, icon: LIGHTRAIL_ICON, distance: distance, altText: `${GREENLINE} light rail, ${distance} away` }
 		case BUS:
-			return { routeName: routeName, backgroundColor: PURPLE, icon: BUS_ICON, distance: distance }
+			return { routeName: routeName, backgroundColor: PURPLE, icon: BUS_ICON, distance: distance, altText: `${routeName} bus, ${distance} away` }
 		default:
 			return
 	}
