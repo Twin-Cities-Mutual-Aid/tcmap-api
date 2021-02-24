@@ -42,6 +42,7 @@ module.exports = {
 	},
 
 	transformPublicTransit: transformPublicTransit,
+	getWarmingSiteStatus: getWarmingSiteStatus
 
 }
 
@@ -74,7 +75,7 @@ mapRecordFields = function(record) {
 		seekingMoneyURL: record.fields.seeking_money_url,
 		noIdNeeded: record.fields.no_id_needed,
 		someInfoRequired: record.fields.some_info_required,
-		warmingSite: record.fields.warming_site,
+		warmingSite: getWarmingSiteStatus(record.fields.automate_warming_site_status, record.fields.currently_open_for_distributing, record.fields.warming_site),
 		publicTransitOptions: transformPublicTransit(record.fields.public_transit),
 		accepting: record.fields.accepting,
 		notAccepting: record.fields.not_accepting,
@@ -93,6 +94,14 @@ transformHours = function(time) {
 		return `${hours}:${minutes} ${ampm}`
 	} else {
 		return time
+	}
+}
+
+function getWarmingSiteStatus(automateWarmingSiteStatus, currentlyOpenForDistributing, warmingSite) {
+	if(automateWarmingSiteStatus) {
+		return currentlyOpenForDistributing === "yes" ? true : undefined
+	} else {
+		return warmingSite
 	}
 }
 

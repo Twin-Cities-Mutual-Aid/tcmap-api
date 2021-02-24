@@ -142,3 +142,25 @@ describe("transformPublicTransit", () => {
         expect(result).toBe(undefined)
     })
 })
+
+describe("getWarmingSiteStatus", () => {
+    it('should return true when automate_warming_site_status checkbox is checked and site is currently open for distributing', () => {
+        let result = siteService.getWarmingSiteStatus(true, "yes", undefined)
+        expect(result).toStrictEqual(true)
+    })
+
+    it('should return true when automate_warming_site_status checkbox is unchecked (undefined) and warming_site checkbox is checked', () => {
+        let result = siteService.getWarmingSiteStatus(undefined, "yes", true)
+        expect(result).toStrictEqual(true)
+    })
+
+    it('should return undefined when automate_warming_site_status checkbox is checked and site is not currently open for distributing', () => {
+        let result = siteService.getWarmingSiteStatus(true, "no", undefined)
+        expect(result).toStrictEqual(undefined)
+    })
+
+    it('should return undefined when automate_warming_site_status checkbox is unchecked (undefined) and warming_site checkbox is not checked (undefined)', () => {
+        let result = siteService.getWarmingSiteStatus(undefined, "yes", undefined)
+        expect(result).toStrictEqual(undefined)
+    })
+})
