@@ -1,6 +1,8 @@
+jest.mock('../airtableClient')
 const hoursUtils = require('./hoursUtils')
 
 const testHours = require('../testData/hours_response.json')
+
 
 const expectedHours = {
     hours: [
