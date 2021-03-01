@@ -1,4 +1,5 @@
-jest.mock('../airtableClient')
+const airtableMock = require('airtable')
+jest.mock('airtable')
 const hoursUtils = require('./hoursUtils')
 
 const testHours = require('../testData/hours_response.json')
