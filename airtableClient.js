@@ -20,6 +20,12 @@ fetchRecords = async function(query) {
 		.all()
 }
 
+fetchHours = async function() {
+	return base('hours_periods_testing')
+		.select()
+		.all()
+}
+
 module.exports = {
 	getMutualAidSites: async function() {
 		const field = 'org_name'
@@ -33,6 +39,16 @@ module.exports = {
 			.catch((error) => {
 				throw new Error("Error fetching Airtable records" + error)
 		  });
+
+		return result
+	},
+
+	getHours: async function() {
+		const wrappedAirtableCall = rateLimiter.wrap(fetchHours)
+		const result = await wrappedAirtableCall()
+			.catch((error) => {
+				throw new Error("Error fetching Airtable hours records" + error)
+		})
 
 		return result
 	}

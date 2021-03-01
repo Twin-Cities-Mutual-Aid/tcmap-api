@@ -15,7 +15,7 @@ If you've got a feature request or feedback to share on the website or backend, 
 
 ## How TCMAP API works
 
-Four files make up the api:
+Four main files make up the api:
 
 ### server.js
 

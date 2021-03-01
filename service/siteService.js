@@ -1,6 +1,8 @@
 
+const { getHours } = require('../airtableClient')
 const airtableClient = require('../airtableClient')
 const cacheService = require('./cacheService')
+const hoursUtils = require('../utils/hoursUtils.js')
 
 const LIGHTRAIL_ICON = "tram"
 const BUS_ICON = "directions_bus"
@@ -22,16 +24,22 @@ module.exports = {
 				console.log("Cache hit. Returning cached result for " + requestPath);
 				return cachedResult
 			} else {
+				const hours = await airtableClient.getHours()
+					.catch( e => {
+						console.error("There was an error getting hours: " + e.message)
+					})
+				// console.log(hours)
+
 				const siteRecords = await airtableClient.getMutualAidSites()
 					.catch( e => {
 						console.error("There was an error getting mutual aid sites: " + e.message)
 						// TODO: Send slack? alert so there's visibility into the error!!
-						return cacheService.readCache(cachePath, true);
+						return cacheService.readCache(cachePath, true)
 					})
 				const result = siteRecords
 						.filter(validateRecord)
-						.map(mapRecordFields)
-				cacheService.writeCache(cachePath, result);
+						.map(siteRecord => mapRecordFields(siteRecord, hours))
+				cacheService.writeCache(cachePath, result)
 				return result
 			}
 		} catch (e) {
@@ -43,7 +51,6 @@ module.exports = {
 
 	transformPublicTransit: transformPublicTransit,
 	getWarmingSiteStatus: getWarmingSiteStatus
-
 }
 
 validateRecord = function(record) {
@@ -55,7 +62,7 @@ validateRecord = function(record) {
 	return has_org && has_lng && has_lat && has_color
 }
 
-mapRecordFields = function(record) {
+mapRecordFields = function(record, hours) {
 	return {
 		name: record.fields.org_name,
 		neighborhood: record.fields.neighborhood_name,
@@ -63,13 +70,8 @@ mapRecordFields = function(record) {
 		longitude: record.fields.longitude,
 		latitude: record.fields.latitude,
 		mostRecentlyUpdatedAt: record.fields.last_updated,
-		currentlyOpenForDistributing: record.fields.currently_open_for_distributing,
-		openingForDistributingDonations: record.fields.opening_for_distributing,
-		openingForDistributingDonations: transformHours(record.fields.opening_for_distributing),
-		closingForDistributingDonations: transformHours(record.fields.closing_for_distributing),
-		currentlyOpenForReceiving: record.fields.currently_open_for_receiving,
-		openingForReceivingDonations: transformHours(record.fields.opening_for_receiving),
-		closingForReceivingDonations:  transformHours(record.fields.closing_for_receiving),
+		...getDistributingHours(record, hours),
+		...getReceivingHours(record, hours),
 		urgentNeed: record.fields.urgent_need,
 		seekingMoney: record.fields.seeking_money,
 		seekingMoneyURL: record.fields.seeking_money_url,
@@ -85,15 +87,60 @@ mapRecordFields = function(record) {
 	}
 }
 
-transformHours = function(time) {
-	if(!isNaN(time)) {
-		const minutes = time[2] + time[3]
-		var hours = time[0] + time[1]
-		const ampm = hours >= 12 ? "pm" : "am"
-		hours = (hours % 12) || 12
-		return `${hours}:${minutes} ${ampm}`
-	} else {
-		return time
+getDistributingHours = function(record, hoursRecords) {
+	if(record.fields.automate_hours) {
+		const siteOperationInfo = getSiteOperationInfo(record.fields.distributes, record.fields.testing_distributing_open_hours, hoursRecords)
+
+		return {
+			currentlyOpenForDistributing: siteOperationInfo.openNow,
+			openingForDistributingDonations: siteOperationInfo.opening,
+			closingForDistributingDonations: siteOperationInfo.closing
+		}
+	}
+	return {
+		currentlyOpenForDistributing: record.fields.currently_open_for_distributing,
+		openingForDistributingDonations: hoursUtils.transformHours(record.fields.opening_for_distributing),
+		closingForDistributingDonations: hoursUtils.transformHours(record.fields.closing_for_distributing),
+	}
+}
+
+getReceivingHours = function(record, hoursRecords) {
+	if(record.fields.automate_hours) {
+		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.testing_receiving_open_hours, hoursRecords)
+		return {
+			currentlyOpenForReceiving: siteOperationInfo.openNow,
+			openingForReceivingDonations: siteOperationInfo.opening,
+			closingForReceivingDonations: siteOperationInfo.closing
+		}
+	}
+
+	return {
+		currentlyOpenForReceiving: record.fields.currently_open_for_receiving,
+		openingForReceivingDonations: hoursUtils.transformHours(record.fields.opening_for_receiving),
+		closingForReceivingDonations:  hoursUtils.transformHours(record.fields.closing_for_receiving),
+	}
+}
+
+getSiteOperationInfo = function(isOperationEnabled, operationOpenHours, hoursList) {
+	let openNow = "no"
+	let opening = "never"
+	let closing = undefined
+	let operationHours = undefined
+	let isEnabled = isOperationEnabled ? true : false
+	if(isOperationEnabled) {
+		operationHours = operationOpenHours ? hoursUtils.getHoursInfo(operationOpenHours, hoursList) : undefined
+		const today = operationHours ? operationHours.hours.find( ({ isToday }) => isToday === true ) : undefined
+		openNow = operationHours ? (operationHours.isOpenNow ? "yes" : "no") : undefined
+		opening = today ? today.openTime : "not today"
+		closing = today ? today.closeTime : undefined
+	}
+	
+	return {
+		isEnabled: isEnabled,
+		openNow: openNow,
+		opening: opening,
+		closing: closing,
+		hoursInfo: operationHours
 	}
 }
 
