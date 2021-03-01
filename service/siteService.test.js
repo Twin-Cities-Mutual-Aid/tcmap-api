@@ -33,9 +33,19 @@ describe("getMutualAidSites", () => {
         expect(result).toStrictEqual(expectedResult)
     })
 
-    it('should return cached result when airtableClient throws error', async () => {
+    it('should return cached result when airtableClient throws error getting sites', async () => {
         cacheServiceMock.readCache.mockResolvedValue(expectedResult)
         airtableClientMock.getMutualAidSites.mockResolvedValue(new Error("There was an error getting mutual aid sites: Error fetching Airtable records"))
+
+        let result = await siteService.getMutualAidSites("/v1/mutual_aid_sites")
+
+        expect(cacheServiceMock.readCache).toHaveBeenCalled()
+        expect(result).toStrictEqual(expectedResult)
+    })
+
+    it('should return cached result when airtableClient throws error getting hours', async () => {
+        cacheServiceMock.readCache.mockResolvedValue(expectedResult)
+        airtableClientMock.getHours.mockResolvedValue(new Error("There was an error getting hours: Error fetching Airtable records"))
 
         let result = await siteService.getMutualAidSites("/v1/mutual_aid_sites")
 
