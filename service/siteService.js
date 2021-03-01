@@ -27,6 +27,8 @@ module.exports = {
 				const hours = await airtableClient.getHours()
 					.catch( e => {
 						console.error("There was an error getting hours: " + e.message)
+						// TODO: Send slack? alert so there's visibility into the error!!
+						return cacheService.readCache(cachePath, true)
 					})
 				// console.log(hours)
 
