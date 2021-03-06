@@ -1,4 +1,3 @@
-const airtableMock = require('airtable')
 jest.mock('airtable')
 const hoursUtils = require('./hoursUtils')
 
