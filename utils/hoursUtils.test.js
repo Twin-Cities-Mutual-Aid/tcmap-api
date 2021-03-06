@@ -108,6 +108,23 @@ describe('transformHours', () => {
     })
 })
 
+describe('checkIsOpenNow', () => {
+    test.each`
+        openTime | closeTime    | nowTime | expectedResult                          
+        ${1100}  | ${1500}      | ${1300} | ${true}    
+        ${0}     | ${undefined} | ${1800} | ${true}    
+        ${1800}  | ${900}       | ${0}    | ${true}    
+        ${1800}  | ${900}       | ${1759} | ${false}    
+        ${0}     | ${1200}      | ${600}  | ${true}    
+        ${1600}  | ${1000}      | ${2359} | ${true}    
+        ${1600}  | ${1000}      | ${1000} | ${false}    
+        ${600}   | ${2000}      | ${2000} | ${false}    
+    `('should return $expectedResult when opening time is $openTime, closing time is $closeTime and now is $nowTime', ({openTime, closeTime, nowTime, expectedResult}) => {
+        let result = hoursUtils.checkIsOpenNow(openTime, closeTime, nowTime)
+        expect(result).toStrictEqual(expectedResult)
+    })
+})
+
 useMockDate = function(date) {
     jest
         .spyOn(global.Date, 'now')

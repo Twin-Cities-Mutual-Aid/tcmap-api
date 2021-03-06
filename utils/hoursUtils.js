@@ -38,7 +38,9 @@ module.exports = {
         } else {
             return time
         }
-    }
+    },
+
+    checkIsOpenNow: checkIsOpenNow
     
 }
 
@@ -74,6 +76,8 @@ getHoursSummary = function(hoursFields) {
 
 getDaySchedule = function(weekday, dayDigit, formattedHours) {
     const hours = (formattedHours.find( ({ day_digit }) => day_digit === dayDigit ) || {})
+
+    const periods = 
     return {
         day: weekday,
         dayDigit: dayDigit,
@@ -107,8 +111,12 @@ parseTodayHours = function(todayHours, datetime) {
     }
 }
 
-checkIsOpenNow = function(opening, closing, nowTime) {
-    return !closing ? true : (opening <= nowTime && nowTime <= closing)
+function checkIsOpenNow(opening, closing, nowTime) {
+    const isOvernightHours = (closing - opening < 0) ? true : false
+    if (isOvernightHours) {
+        return (opening <= nowTime && nowTime <= 2359) || (0 <= nowTime && nowTime < closing)
+    }
+    return !closing ? true : (opening <= nowTime && nowTime < closing)
 }
 
 checkIsOpeningSoon = function(opening, nowTime) {
