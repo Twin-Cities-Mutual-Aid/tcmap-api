@@ -2,9 +2,6 @@
   {
     "id": "recmmC9oshIcu35c3",
     "fields": {
-      "open_hours (testing)": ["reciSpK6ccK8gMlWF"],
-      "open (from day_time (testing))": ["recyoACvHHYWwA7sh"],
-      "close (from day_time (testing))": ["rectjyzp8DEWKFpD1"],
       "open_weekday": "Monday",
       "open_time_digits": "1100",
       "mutual_aid_locations": [
@@ -25,16 +22,8 @@
         "reccgYd62wRSyqk1N"
       ],
       "close_time_digits": "1500",
-      "old_primary_key": 7,
       "summary": "Monday 11:00AM -  3:00PM",
-      "open_time (from day_time (testing))": [0],
-      "open_day (from day_time (testing))": [6],
-      "close_day (from day_time (testing))": [6],
-      "close_time (from close (from day_time (testing)))": [2359],
-      "open_weekday (from day_time (testing))": ["Sunday"],
-      "close_weekday (from day_time (testing))": ["Sunday"],
       "open_time_12_hour": "2021-02-28T11:00:00.000Z",
-      "close_time_24_hour": "2021-02-28T23:59:00.000Z",
       "close_time": "3:00PM",
       "open_time": "11:00AM",
       "open_weekday_digit": 1,
@@ -65,10 +54,8 @@
         "reccgYd62wRSyqk1N"
       ],
       "close_time_digits": "1500",
-      "old_primary_key": 40,
       "summary": "Thursday 11:00AM -  3:00PM",
       "open_time_12_hour": "2021-02-28T11:00:00.000Z",
-      "close_time_24_hour": "2021-02-28T00:00:00.000Z",
       "close_time": "3:00PM",
       "open_time": "11:00AM",
       "open_weekday_digit": 4,
@@ -89,10 +76,8 @@
         "recKm8skDW4P2vHIV"
       ],
       "close_time_digits": "1300",
-      "old_primary_key": 47,
       "summary": "Friday 11:00AM - Friday 1:00PM",
       "open_time_12_hour": "2021-02-28T11:00:00.000Z",
-      "close_time_24_hour": "2021-02-28T00:00:00.000Z",
       "close_time": "1:00PM",
       "open_time": "11:00AM",
       "open_weekday_digit": 5,
@@ -105,11 +90,7 @@
   {
     "id": "recSpjdkWPkmzjc9m",
     "fields": {
-      "open_hours (testing)": ["reciSpK6ccK8gMlWF"],
-      "open (from day_time (testing))": ["recN4duuQsqp7G2XJ"],
-      "close (from day_time (testing))": ["recB91WUqEQRZRHvd"],
       "open_weekday": "Monday",
-      "Testing base": ["recWmmRyhVrb4rVIp"],
       "open_time_digits": "0000",
       "mutual_aid_locations": ["reclMihBQyiXuWgaW"],
       "mutual_aid_locations 2": [
@@ -117,16 +98,8 @@
         "recpniloimyNk3zTo",
         "recUBqNEJ2PwpJfHE"
       ],
-      "old_primary_key": 1,
       "summary": "Monday 12:00AM -  12:00AM",
-      "open_time (from day_time (testing))": [0],
-      "open_day (from day_time (testing))": [0],
-      "close_day (from day_time (testing))": [0],
-      "close_time (from close (from day_time (testing)))": [2359],
-      "open_weekday (from day_time (testing))": ["Monday"],
-      "close_weekday (from day_time (testing))": ["Monday"],
       "open_time_12_hour": "2021-02-28T00:00:00.000Z",
-      "close_time_24_hour": "2021-02-28T23:59:00.000Z",
       "close_time": "12:00AM",
       "open_time": "12:00AM",
       "open_weekday_digit": 1,
@@ -137,11 +110,7 @@
   {
     "id": "recuq0G9dcDh0fIFS",
     "fields": {
-      "open_hours (testing)": ["reciSpK6ccK8gMlWF"],
-      "open (from day_time (testing))": ["recEUkGJzvnae8dRk"],
-      "close (from day_time (testing))": ["recFezJVHJEActXJL"],
       "open_weekday": "Tuesday",
-      "Testing base": ["recWmmRyhVrb4rVIp"],
       "open_time_digits": "0000",
       "mutual_aid_locations": ["reclMihBQyiXuWgaW"],
       "mutual_aid_locations 2": [
@@ -149,16 +118,8 @@
         "recpniloimyNk3zTo",
         "recUBqNEJ2PwpJfHE"
       ],
-      "old_primary_key": 2,
       "summary": "Tuesday 12:00AM -  12:00AM",
-      "open_time (from day_time (testing))": [0],
-      "open_day (from day_time (testing))": [1],
-      "close_day (from day_time (testing))": [1],
-      "close_time (from close (from day_time (testing)))": [2359],
-      "open_weekday (from day_time (testing))": ["Tuesday"],
-      "close_weekday (from day_time (testing))": ["Tuesday"],
       "open_time_12_hour": "2021-02-28T00:00:00.000Z",
-      "close_time_24_hour": "2021-02-28T23:59:00.000Z",
       "close_time": "12:00AM",
       "open_time": "12:00AM",
       "open_weekday_digit": 2,
@@ -169,9 +130,6 @@
   {
     "id": "rec3nv0GVDNPQzs32",
     "fields": {
-      "open_hours (testing)": ["reciSpK6ccK8gMlWF"],
-      "open (from day_time (testing))": ["recq6tRIaJ20AWUSe"],
-      "close (from day_time (testing))": ["recZpGiCFL1OAh2Ff"],
       "open_weekday": "Wednesday",
       "open_time_digits": "0000",
       "mutual_aid_locations": ["reclMihBQyiXuWgaW"],
@@ -180,16 +138,8 @@
         "recpniloimyNk3zTo",
         "recUBqNEJ2PwpJfHE"
       ],
-      "old_primary_key": 3,
       "summary": "Wednesday 12:00AM -  12:00AM",
-      "open_time (from day_time (testing))": [0],
-      "open_day (from day_time (testing))": [2],
-      "close_day (from day_time (testing))": [2],
-      "close_time (from close (from day_time (testing)))": [2359],
-      "open_weekday (from day_time (testing))": ["Wednesday"],
-      "close_weekday (from day_time (testing))": ["Wednesday"],
       "open_time_12_hour": "2021-02-28T00:00:00.000Z",
-      "close_time_24_hour": "2021-02-28T23:59:00.000Z",
       "close_time": "12:00AM",
       "open_time": "12:00AM",
       "open_weekday_digit": 3,
