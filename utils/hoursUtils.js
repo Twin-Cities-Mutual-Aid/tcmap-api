@@ -77,7 +77,6 @@ getHoursSummary = function(hoursFields) {
 getDaySchedule = function(weekday, dayDigit, formattedHours) {
     const hours = (formattedHours.find( ({ day_digit }) => day_digit === dayDigit ) || {})
 
-    const periods = 
     return {
         day: weekday,
         dayDigit: dayDigit,
