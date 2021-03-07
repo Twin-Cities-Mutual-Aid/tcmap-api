@@ -2,49 +2,51 @@ const airtableClient = require('../airtableClient')
 
 
 module.exports = {
-
-    getHoursInfo: function(periodsArray, hoursList) {
-        const hoursRecords = periodsArray.map( id => hoursList.find(x => x.id == id))
-        const hoursFields = hoursRecords.map(x => x.fields)
-        const hoursSummary = getHoursSummary(hoursFields)
     
-        const datetimeNow = getDatetimeNow()
-        const todayDigit = datetimeNow.getDay()
-        const todayHours = hoursFields.find(period => period.open_weekday_digit == todayDigit)
-        const hoursWindow = todayHours ? parseTodayHours(todayHours, datetimeNow) : undefined
-    
-        if(hoursWindow) {
-            return {
-                ...hoursWindow,
-                hours: hoursSummary
-            }
-        } else {
-            return {
-                isOpenNow: false,
-                openingSoon: undefined,
-                closingSoon: undefined,
-                hours: hoursSummary
-            }
-        }
-    },
-    
-    transformHours: function(time) {
-        if(!isNaN(time)) {
-            const minutes = time[2] + time[3]
-            var hours = time[0] + time[1]
-            const ampm = hours >= 12 ? "pm" : "am"
-            hours = (hours % 12) || 12
-            return `${hours}:${minutes} ${ampm}`
-        } else {
-            return time
-        }
-    },
-
+    getHoursInfo: getHoursInfo,
+    transformHours: transformHours,
     checkIsOpenNow: checkIsOpenNow
     
 }
 
-getHoursSummary = function(hoursFields) {
+function getHoursInfo(periodsArray, hoursList) {
+    const hoursRecords = periodsArray.map( id => hoursList.find(x => x.id == id))
+    const hoursFields = hoursRecords.map(x => x.fields)
+    const hoursSummary = getHoursSummary(hoursFields)
+
+    const datetimeNow = getDatetimeNow()
+    const todayDigit = datetimeNow.getDay()
+    const todayHours = hoursFields.find(period => period.open_weekday_digit == todayDigit)
+    const hoursWindow = todayHours ? parseTodayHours(todayHours, datetimeNow) : undefined
+
+    if(hoursWindow) {
+        return {
+            ...hoursWindow,
+            hours: hoursSummary
+        }
+    } else {
+        return {
+            isOpenNow: false,
+            openingSoon: undefined,
+            closingSoon: undefined,
+            hours: hoursSummary
+        }
+    }
+}
+
+function transformHours(time) {
+    if(!isNaN(time)) {
+        const minutes = time[2] + time[3]
+        var hours = time[0] + time[1]
+        const ampm = hours >= 12 ? "pm" : "am"
+        hours = (hours % 12) || 12
+        return `${hours}:${minutes} ${ampm}`
+    } else {
+        return time
+    }
+}
+
+function getHoursSummary(hoursFields) {
     const formattedHours = hoursFields.map(field => 
         {
             const closeTimeDigits = field.close_time_digits
@@ -74,7 +76,7 @@ getHoursSummary = function(hoursFields) {
 
 }
 
-getDaySchedule = function(weekday, dayDigit, formattedHours) {
+function getDaySchedule(weekday, dayDigit, formattedHours) {
     const hours = (formattedHours.find( ({ day_digit }) => day_digit === dayDigit ) || {})
 
     return {
@@ -87,12 +89,12 @@ getDaySchedule = function(weekday, dayDigit, formattedHours) {
     }
 }
 
-checkIsToday = function(dayDigit) {
+function checkIsToday (dayDigit) {
     const todayDigit = getDatetimeNow().getDay()
     return todayDigit === dayDigit
 }
 
-parseTodayHours = function(todayHours, datetime) {
+function parseTodayHours(todayHours, datetime) {
     const opening = todayHours.open_time_digits
     const closing = todayHours.close_time_digits
     
@@ -118,21 +120,21 @@ function checkIsOpenNow(opening, closing, nowTime) {
     return !closing ? true : (opening <= nowTime && nowTime < closing)
 }
 
-checkIsOpeningSoon = function(opening, nowTime) {
+function checkIsOpeningSoon(opening, nowTime) {
     const timeTilOpen = opening - nowTime
     return (0 <= timeTilOpen && timeTilOpen <= 100 )
 }
 
-checkIsClosingSoon = function(closing, nowTime) {
+function checkIsClosingSoon(closing, nowTime) {
     const timeTilClose = closing - nowTime
     return (0 <= timeTilClose && timeTilClose <= 100 )
 }
 
-getDatetimeNow = function() {
+function getDatetimeNow() {
     const mplsDatetime = new Date(Date.now()).toLocaleString("en-US", {timeZone: "America/Chicago"})
     return new Date(mplsDatetime)
 }
 
-addZero = function(num) {
+function addZero(num) {
     return num < 10 ? "0" + num : num
 }

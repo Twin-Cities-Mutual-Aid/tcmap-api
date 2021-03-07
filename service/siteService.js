@@ -1,5 +1,3 @@
-
-const { getHours } = require('../airtableClient')
 const airtableClient = require('../airtableClient')
 const cacheService = require('./cacheService')
 const hoursUtils = require('../utils/hoursUtils.js')
@@ -30,7 +28,6 @@ module.exports = {
 						// TODO: Send slack? alert so there's visibility into the error!!
 						return cacheService.readCache(cachePath, true)
 					})
-				// console.log(hours)
 
 				const siteRecords = await airtableClient.getMutualAidSites()
 					.catch( e => {
