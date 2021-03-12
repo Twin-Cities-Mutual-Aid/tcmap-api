@@ -83,6 +83,7 @@ describe('getHoursInfo', () => {
     `('should return site as $openStatus with summary when site "$hours" and is $openStatus', ({date, isOpenNow, openingSoon, closingSoon}) => {
         Settings.defaultZoneName = "America/Chicago"
         Settings.now = () => date.valueOf()
+        console.log(DateTime.now().toLocaleString(DateTime.DATETIME_FULL))
 
         const expectedResult = {
             isOpenNow: isOpenNow,
