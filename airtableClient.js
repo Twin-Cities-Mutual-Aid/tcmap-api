@@ -21,7 +21,7 @@ fetchRecords = async function(query) {
 }
 
 fetchHours = async function() {
-	return base('hours_periods_testing')
+	return base('hours_periods')
 		.select()
 		.all()
 }

@@ -1,4 +1,4 @@
-const airtableClient = require('../airtableClient')
+const { DateTime, Interval } = require("luxon")
 
 
 module.exports = {
@@ -12,24 +12,23 @@ module.exports = {
 function getHoursInfo(periodsArray, hoursList) {
     const hoursRecords = periodsArray.map( id => hoursList.find(x => x.id == id))
     const hoursFields = hoursRecords.map(x => x.fields)
-    const hoursSummary = getHoursSummary(hoursFields)
+    const schedule = getSchedule(hoursFields)
 
-    const datetimeNow = getDatetimeNow()
-    const todayDigit = datetimeNow.getDay()
+    const todayDigit = DateTime.now().weekday
     const todayHours = hoursFields.find(period => period.open_weekday_digit == todayDigit)
-    const hoursWindow = todayHours ? parseTodayHours(todayHours, datetimeNow) : undefined
+    const hoursWindow = todayHours ? parseTodayHours(todayHours) : undefined
 
     if(hoursWindow) {
         return {
             ...hoursWindow,
-            hours: hoursSummary
+            hours: schedule
         }
     } else {
         return {
             isOpenNow: false,
             openingSoon: undefined,
             closingSoon: undefined,
-            hours: hoursSummary
+            hours: schedule
         }
     }
 }
@@ -38,32 +37,28 @@ function transformHours(time) {
     if(!isNaN(time)) {
         const minutes = time[2] + time[3]
         var hours = time[0] + time[1]
-        const ampm = hours >= 12 ? "pm" : "am"
+        const ampm = hours >= 12 ? "PM" : "AM"
         hours = (hours % 12) || 12
-        return `${hours}:${minutes} ${ampm}`
+        return `${hours}:${minutes}${ampm}`
     } else {
         return time
     }
 }
 
-function getHoursSummary(hoursFields) {
+function getSchedule(hoursFields) {
     const formattedHours = hoursFields.map(field => 
         {
-            const closeTimeDigits = field.close_time_digits
-            const hoursObject = {
-                day: field.open_weekday,
-                day_digit: field.open_weekday_digit,
+            return {
+                weekdayDigit: field.open_weekday_digit,
                 openTime: field.open_time,
-                open_time_digits: field.open_time_digits,
+                openTimeDigits: field.open_time_digits,
                 closeTime: field.close_time,
-                close_time_digits: closeTimeDigits ? closeTimeDigits : undefined,
-                hoursSummary: closeTimeDigits ? `${field.open_time} - ${field.close_time}` : "Open 24 hours"
+                closeTimeDigits: field.close_time_digits,
             }
-            return hoursObject
         }
     )
 
-    const weeklySchedule = [
+    return [
         getDaySchedule("sunday", 0, formattedHours),
         getDaySchedule("monday", 1, formattedHours),
         getDaySchedule("tuesday", 2, formattedHours),
@@ -72,69 +67,69 @@ function getHoursSummary(hoursFields) {
         getDaySchedule("friday", 5, formattedHours),
         getDaySchedule("saturday", 6, formattedHours)
     ]
-    return weeklySchedule
-
 }
 
 function getDaySchedule(weekday, dayDigit, formattedHours) {
-    const hours = (formattedHours.find( ({ day_digit }) => day_digit === dayDigit ) || {})
+    const hours = (formattedHours.find( ({ weekdayDigit }) => weekdayDigit === dayDigit ) || undefined)
+    let is24Hours = false
+    if(hours) {
+        is24Hours = check24Hours(hours.openTimeDigits, hours.closeTimeDigits)
+    }
 
     return {
         day: weekday,
         dayDigit: dayDigit,
-        openTime: hours.openTime,
-        closeTime: hours.closeTime,
+        openTime: hours ? hours.openTime : undefined,
+        closeTime: hours ? hours.closeTime : undefined,
+        is24Hours: is24Hours,
         isToday: checkIsToday(dayDigit),
-        hoursSummary: hours.hoursSummary || "Closed"
+    }
+}
+
+function parseTodayHours(todayHours) {
+    const is24Hours = todayHours ? check24Hours(todayHours.open_time_digits, todayHours.close_time_digits) : false
+    
+    if (!is24Hours) {
+        const openTime = todayHours.open_time_digits
+        const closeTime = todayHours.close_time_digits
+        const opening = DateTime.fromObject({hour: openTime.substring(0,2), minutes: openTime.substring(2,4), zone: 'America/Chicago'})
+        const closing = DateTime.fromObject({hour: closeTime.substring(0,2), minutes: closeTime.substring(2,4), zone: 'America/Chicago'})
+        const nowTime = DateTime.now()
+        const isOpenNow = checkIsOpenNow(opening, closing, nowTime)
+        const openingSoon = !isOpenNow ? checkIsNearHoursStartOrEnd(opening, nowTime) : false
+        const closingSoon = isOpenNow ? checkIsNearHoursStartOrEnd(closing, nowTime) : false
+        
+        return {
+            isOpenNow: isOpenNow,
+            openingSoon: openingSoon,
+            closingSoon: closingSoon,
+        }
+    } else {
+        return {
+            isOpenNow: true,
+            openingSoon: false,
+            closingSoon: false,
+        }
     }
 }
 
 function checkIsToday (dayDigit) {
-    const todayDigit = getDatetimeNow().getDay()
+    const todayDigit = DateTime.now().weekday
     return todayDigit === dayDigit
 }
 
-function parseTodayHours(todayHours, datetime) {
-    const opening = todayHours.open_time_digits
-    const closing = todayHours.close_time_digits
-    
-    const nowHours = addZero(datetime.getHours())
-    const nowMinutes = addZero(datetime.getMinutes())
-    const nowTime = nowHours + "" + nowMinutes
-
-    const isOpenNow = checkIsOpenNow(opening, closing, nowTime)
-    const openingSoon = checkIsOpeningSoon(opening, nowTime)
-    const closingSoon = checkIsClosingSoon(closing, nowTime)
-    return {
-        isOpenNow: isOpenNow,
-        openingSoon: openingSoon,
-        closingSoon: closingSoon,
-    }
+function check24Hours(open, close) {
+    return (open && !close) ? true : false
 }
 
-function checkIsOpenNow(opening, closing, nowTime) {
-    const isOvernightHours = (closing - opening < 0) ? true : false
-    if (isOvernightHours) {
-        return (opening <= nowTime && nowTime <= 2359) || (0 <= nowTime && nowTime < closing)
-    }
-    return !closing ? true : (opening <= nowTime && nowTime < closing)
+function checkIsOpenNow(openTime, closeTime, nowTime) {
+    const isOvernightHours = closeTime < openTime
+    const trueClosing = isOvernightHours ? closeTime.plus({ days: 1 }) : closeTime
+    const hours = Interval.fromDateTimes(openTime, trueClosing)
+    return hours.contains(nowTime)
 }
 
-function checkIsOpeningSoon(opening, nowTime) {
-    const timeTilOpen = opening - nowTime
-    return (0 <= timeTilOpen && timeTilOpen <= 100 )
-}
-
-function checkIsClosingSoon(closing, nowTime) {
-    const timeTilClose = closing - nowTime
-    return (0 <= timeTilClose && timeTilClose <= 100 )
-}
-
-function getDatetimeNow() {
-    const mplsDatetime = new Date(Date.now()).toLocaleString("en-US", {timeZone: "America/Chicago"})
-    return new Date(mplsDatetime)
-}
-
-function addZero(num) {
-    return num < 10 ? "0" + num : num
+function checkIsNearHoursStartOrEnd(time, nowTime) {
+    const timeTil = time.diff(nowTime, 'hours')
+    return 0 <= timeTil.hours && timeTil.hours <= 1
 }

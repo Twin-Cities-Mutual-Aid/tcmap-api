@@ -10,6 +10,10 @@ const BUS = "BUS"
 const PURPLE = "#771473"
 const BLUE = "#0055A5"
 const GREEN = "#00B100"
+const NEVER = "never"
+const NOT_TODAY = "not today"
+const NO = "no"
+const YES = "yes"
 
 module.exports = {
 
@@ -121,16 +125,16 @@ getReceivingHours = function(record, hoursRecords) {
 }
 
 getSiteOperationInfo = function(isOperationEnabled, operationOpenHours, hoursList) {
-	let openNow = "no"
-	let opening = "never"
+	let openNow = NO
+	let opening = NEVER
 	let closing = undefined
 	let operationHours = undefined
 	let isEnabled = isOperationEnabled ? true : false
 	if(isOperationEnabled) {
 		operationHours = operationOpenHours ? hoursUtils.getHoursInfo(operationOpenHours, hoursList) : undefined
 		const today = operationHours ? operationHours.hours.find( ({ isToday }) => isToday === true ) : undefined
-		openNow = operationHours ? (operationHours.isOpenNow ? "yes" : "no") : undefined
-		opening = today ? today.openTime : "not today"
+		openNow = operationHours ? (operationHours.isOpenNow ? YES : NO) : undefined
+		opening = today ? today.openTime : NOT_TODAY
 		closing = today ? today.closeTime : undefined
 	}
 	
@@ -145,7 +149,7 @@ getSiteOperationInfo = function(isOperationEnabled, operationOpenHours, hoursLis
 
 function getWarmingSiteStatus(automateWarmingSiteStatus, currentlyOpenForDistributing, warmingSite) {
 	if(automateWarmingSiteStatus) {
-		return currentlyOpenForDistributing === "yes" ? true : undefined
+		return currentlyOpenForDistributing === YES ? true : undefined
 	} else {
 		return warmingSite
 	}

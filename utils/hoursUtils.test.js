@@ -1,4 +1,5 @@
 jest.mock('airtable')
+const { Settings, DateTime } = require("luxon")
 const hoursUtils = require('./hoursUtils')
 
 const testHours = require('../testData/hours_response.json')
@@ -11,16 +12,16 @@ const expectedHours = {
             dayDigit: 0,
             openTime: undefined,
             closeTime: undefined,
+            is24Hours: false,
             isToday: false,
-            hoursSummary: 'Closed'
         },
         {
             day: 'monday',
             dayDigit: 1,
             openTime: '11:00AM',
             closeTime: '3:00PM',
+            is24Hours: false,
             isToday: false,
-            hoursSummary: '11:00AM - 3:00PM'
         },
         {
             day: 'tuesday',
@@ -28,7 +29,7 @@ const expectedHours = {
             openTime: '12:00AM',
             closeTime: '12:00AM',
             isToday: false,
-            hoursSummary: 'Open 24 hours'
+            is24Hours: true,
         },
         {
             day: 'wednesday',
@@ -36,7 +37,7 @@ const expectedHours = {
             openTime: '12:00AM',
             closeTime: '12:00AM',
             isToday: false,
-            hoursSummary: 'Open 24 hours'
+            is24Hours: true,
         },
         {
             day: 'thursday',
@@ -44,7 +45,7 @@ const expectedHours = {
             openTime: '11:00AM',
             closeTime: '3:00PM',
             isToday: true,
-            hoursSummary: '11:00AM - 3:00PM'
+            is24Hours: false,
         },
         {
             day: 'friday',
@@ -52,7 +53,7 @@ const expectedHours = {
             openTime: undefined,
             closeTime: undefined,
             isToday: false,
-            hoursSummary: 'Closed'
+            is24Hours: false,
         },
         {
             day: 'saturday',
@@ -60,7 +61,7 @@ const expectedHours = {
             openTime: undefined,
             closeTime: undefined,
             isToday: false,
-            hoursSummary: 'Closed'
+            is24Hours: false,
         }
     ]
 }
@@ -75,12 +76,14 @@ describe('getHoursInfo', () => {
 
     // ${"not open now"} | ${"has no hours today"} | ${'2021-02-26T16:01:58.135Z'} | ${false}   | ${undefined}    | ${undefined}
     test.each`
-        openStatus        | hours                   | date                          | isOpenNow  | openingSoon     | closingSoon
-        ${"open now"}     | ${"has hours today"}    | ${'2021-02-25T18:01:58.135Z'} | ${true}    | ${false}        | ${false}
-        ${"open now"}     | ${"has hours today"}    | ${'2021-02-25T20:01:58.135Z'} | ${true}    | ${false}        | ${true}
-        ${"not open now"} | ${"has hours today"}    | ${'2021-02-25T16:01:58.135Z'} | ${false}   | ${true}         | ${false}
+    openStatus        | hours                   | date                          | isOpenNow  | openingSoon     | closingSoon
+    ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 12, 10)} | ${true}    | ${false}        | ${false}
+    ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 14, 59)} | ${true}    | ${false}        | ${true}
+    ${"not open now"} | ${"has hours today"}    | ${new Date(2021, 1, 25, 10, 10)} | ${false}   | ${true}         | ${false}
     `('should return site as $openStatus with summary when site "$hours" and is $openStatus', ({date, isOpenNow, openingSoon, closingSoon}) => {
-        useMockDate(date)
+        // useMockDate(date)
+        Settings.now = () => date.valueOf()
+        console.log(DateTime.now().toLocaleString(DateTime.DATETIME_FULL))
 
         const expectedResult = {
             isOpenNow: isOpenNow,
@@ -97,8 +100,8 @@ describe('transformHours', () => {
     
     test.each`
         resultDesc                | timeDesc     | time           | expectedResult                          
-        ${"formatted 12hour time"}| ${"morning"} | ${"1000"}      | ${"10:00 am"}    
-        ${"formatted 12hour time"}| ${"evening"} | ${"1900"}      | ${"7:00 pm"}    
+        ${"formatted 12hour time"}| ${"morning"} | ${"1000"}      | ${"10:00AM"}    
+        ${"formatted 12hour time"}| ${"evening"} | ${"1900"}      | ${"7:00PM"}    
         ${"not today"}            | ${"not"}     | ${"not today"} | ${"not today"}    
     `('should return $resultDesc when time is $timeDesc number', ({time, expectedResult}) => {
         let result = hoursUtils.transformHours(time)
@@ -109,23 +112,21 @@ describe('transformHours', () => {
 
 describe('checkIsOpenNow', () => {
     test.each`
-        openTime | closeTime    | nowTime | expectedResult                          
-        ${1100}  | ${1500}      | ${1300} | ${true}    
-        ${0}     | ${undefined} | ${1800} | ${true}    
-        ${1800}  | ${900}       | ${0}    | ${true}    
-        ${1800}  | ${900}       | ${1759} | ${false}    
-        ${0}     | ${1200}      | ${600}  | ${true}    
-        ${1600}  | ${1000}      | ${2359} | ${true}    
-        ${1600}  | ${1000}      | ${1000} | ${false}    
-        ${600}   | ${2000}      | ${2000} | ${false}    
-    `('should return $expectedResult when opening time is $openTime, closing time is $closeTime and now is $nowTime', ({openTime, closeTime, nowTime, expectedResult}) => {
-        let result = hoursUtils.checkIsOpenNow(openTime, closeTime, nowTime)
+        openHours | openMinutes | closeHours | closeMinutes | nowHours | nowMinutes | nextDay  | expectedResult                          
+        ${"11"}   | ${"00"}     | ${"15"}    | ${"00"}      | ${"13"}  | ${"00"}    | ${false} | ${true}    
+        ${"18"}   | ${"00"}     | ${"09"}    | ${"00"}      | ${"00"}  | ${"00"}    | ${true}  | ${true}    
+        ${"18"}   | ${"00"}     | ${"09"}    | ${"00"}      | ${"17"}  | ${"59"}    | ${false} | ${false}    
+        ${"00"}   | ${"00"}     | ${"12"}    | ${"00"}      | ${"06"}  | ${"00"}    | ${false} | ${true}    
+        ${"16"}   | ${"00"}     | ${"10"}    | ${"00"}      | ${"23"}  | ${"59"}    | ${false} | ${true}    
+        ${"16"}   | ${"00"}     | ${"10"}    | ${"00"}      | ${"10"}  | ${"00"}    | ${true}  | ${false}    
+        ${"06"}   | ${"00"}     | ${"20"}    | ${"00"}      | ${"20"}  | ${"00"}    | ${false} | ${false}    
+    `('should return $expectedResult when opening time is $openHours$openMinutes, closing time is $closeHours$closeMinutes and now is $nowHours$nowMinutes', ({openHours, openMinutes, closeHours, closeMinutes, nowHours, nowMinutes, nextDay, expectedResult}) => {
+        const openTime = DateTime.fromObject({hour: openHours, minutes: openMinutes, zone: 'America/Chicago'})
+        const closeTime = DateTime.fromObject({hour: closeHours, minutes: closeMinutes, zone: 'America/Chicago'})
+        let now = DateTime.fromObject({hour: nowHours, minutes: nowMinutes, zone: 'America/Chicago'})
+        now = nextDay ? now.plus({day: 1}) : now
+
+        let result = hoursUtils.checkIsOpenNow(openTime, closeTime, now)
         expect(result).toStrictEqual(expectedResult)
     })
 })
-
-useMockDate = function(date) {
-    jest
-        .spyOn(global.Date, 'now')
-        .mockImplementation(() => new Date(date).valueOf())
-}
