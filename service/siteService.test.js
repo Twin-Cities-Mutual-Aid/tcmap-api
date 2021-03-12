@@ -22,7 +22,8 @@ describe("getMutualAidSites", () => {
     afterEach(() => jest.resetAllMocks());
 
     it('should return all properties accurately mapped', async () => {
-        Settings.now = () => new Date(2021, 1, 25, 12, 10).valueOf()
+        Settings.defaultZoneName = "America/Chicago"
+        Settings.now = () => new Date(2021, 1, 25, 18, 10).valueOf()
 
         airtableClientMock.getMutualAidSites.mockResolvedValue(testSites)
         airtableClientMock.getHours.mockResolvedValue(testHours)
