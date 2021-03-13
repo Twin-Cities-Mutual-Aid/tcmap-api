@@ -76,13 +76,14 @@ describe('getHoursInfo', () => {
 
     // ${"not open now"} | ${"has no hours today"} | ${'2021-02-26T16:01:58.135Z'} | ${false}   | ${undefined}    | ${undefined}
     test.each`
-    openStatus        | hours                   | date                          | isOpenNow  | openingSoon     | closingSoon
-    ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 18, 10)} | ${true}    | ${false}        | ${false}
-    ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 20, 59)} | ${true}    | ${false}        | ${true}
-    ${"not open now"} | ${"has hours today"}    | ${new Date(2021, 1, 25, 16, 10)} | ${false}   | ${true}         | ${false}
+    openStatus        | hours                   | date                             | isOpenNow  | openingSoon     | closingSoon
+    ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 12, 10)} | ${true}    | ${false}        | ${false}
+    ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 14, 59)} | ${true}    | ${false}        | ${true}
+    ${"not open now"} | ${"has hours today"}    | ${new Date(2021, 1, 25, 10, 10)} | ${false}   | ${true}         | ${false}
     `('should return site as $openStatus with summary when site "$hours" and is $openStatus', ({date, isOpenNow, openingSoon, closingSoon}) => {
-        Settings.defaultZoneName = "America/Chicago"
+        // Settings.defaultZoneName = "America/Chicago"
         Settings.now = () => date.valueOf()
+
         console.log(DateTime.now().toLocaleString(DateTime.DATETIME_FULL))
 
         const expectedResult = {
@@ -121,9 +122,9 @@ describe('checkIsOpenNow', () => {
         ${"16"}   | ${"00"}     | ${"10"}    | ${"00"}      | ${"10"}  | ${"00"}    | ${true}  | ${false}    
         ${"06"}   | ${"00"}     | ${"20"}    | ${"00"}      | ${"20"}  | ${"00"}    | ${false} | ${false}    
     `('should return $expectedResult when opening time is $openHours$openMinutes, closing time is $closeHours$closeMinutes and now is $nowHours$nowMinutes', ({openHours, openMinutes, closeHours, closeMinutes, nowHours, nowMinutes, nextDay, expectedResult}) => {
-        const openTime = DateTime.fromObject({hour: openHours, minutes: openMinutes, zone: 'America/Chicago'})
-        const closeTime = DateTime.fromObject({hour: closeHours, minutes: closeMinutes, zone: 'America/Chicago'})
-        let now = DateTime.fromObject({hour: nowHours, minutes: nowMinutes, zone: 'America/Chicago'})
+        const openTime = DateTime.fromObject({hour: openHours, minutes: openMinutes})
+        const closeTime = DateTime.fromObject({hour: closeHours, minutes: closeMinutes})
+        let now = DateTime.fromObject({hour: nowHours, minutes: nowMinutes})
         now = nextDay ? now.plus({day: 1}) : now
 
         let result = hoursUtils.checkIsOpenNow(openTime, closeTime, now)
