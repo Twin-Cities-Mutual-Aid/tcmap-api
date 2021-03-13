@@ -1,6 +1,5 @@
 const { Settings, DateTime, Interval } = require("luxon")
 
-// Settings.defaultZoneName = "America/Chicago"
 
 module.exports = {
     
@@ -14,8 +13,6 @@ function getHoursInfo(periodsArray, hoursList) {
     const hoursRecords = periodsArray.map( id => hoursList.find(x => x.id == id))
     const hoursFields = hoursRecords.map(x => x.fields)
     const schedule = getSchedule(hoursFields)
-
-    // Settings.defaultZoneName = "America/Chicago"
 
     const todayDigit = DateTime.now().weekday
     const todayHours = hoursFields.find(period => period.open_weekday_digit == todayDigit)
@@ -91,24 +88,14 @@ function getDaySchedule(weekday, dayDigit, formattedHours) {
 
 function parseTodayHours(todayHours) {
     const is24Hours = todayHours ? check24Hours(todayHours.open_time_digits, todayHours.close_time_digits) : false
-    // Settings.defaultZoneName = "America/Chicago"
     
     if (!is24Hours) {
         const openTime = todayHours.open_time_digits
         const closeTime = todayHours.close_time_digits
-        // const opening = DateTime.fromObject({hour: openTime.substring(0,2), minutes: openTime.substring(2,4), zone: 'America/Chicago'}).toUTC()
         const opening = DateTime.fromObject({hour: openTime.substring(0,2), minutes: openTime.substring(2,4)})
-        console.log("opening")
-        console.log(opening.toLocaleString(DateTime.DATETIME_FULL))
-        // console.log(opening.toLocaleString(DateTime.DATETIME_FULL))
-        // const closing = DateTime.fromObject({hour: closeTime.substring(0,2), minutes: closeTime.substring(2,4), zone: 'America/Chicago'}).toUTC()
         const closing = DateTime.fromObject({hour: closeTime.substring(0,2), minutes: closeTime.substring(2,4)})
-        console.log(closing.toLocaleString(DateTime.DATETIME_FULL))
         const nowTime = DateTime.now().toUTC()
-        // console.log(nowTime.toLocaleString(DateTime.DATETIME_FULL))
         const isOpenNow = checkIsOpenNow(opening, closing, nowTime)
-        console.log("open now")
-        console.log(isOpenNow)
         const openingSoon = !isOpenNow ? checkIsNearHoursStartOrEnd(opening, nowTime) : false
         const closingSoon = isOpenNow ? checkIsNearHoursStartOrEnd(closing, nowTime) : false
         

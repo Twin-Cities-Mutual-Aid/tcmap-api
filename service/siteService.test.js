@@ -1,8 +1,7 @@
-const airtableMock = require('airtable')
 const airtableClientMock = require('../airtableClient')
 const cacheServiceMock = require('./cacheService')
 const siteService = require('./siteService')
-const { Settings, DateTime } = require("luxon")
+const { Settings } = require("luxon")
 
 jest.mock('airtable')
 jest.mock('../airtableClient')
@@ -22,7 +21,6 @@ describe("getMutualAidSites", () => {
     afterEach(() => jest.resetAllMocks());
 
     it('should return all properties accurately mapped', async () => {
-        // Settings.defaultZoneName = "America/Chicago"
         Settings.now = () => new Date(2021, 1, 25, 12, 10).valueOf()
 
         airtableClientMock.getMutualAidSites.mockResolvedValue(testSites)
