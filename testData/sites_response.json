@@ -69,7 +69,7 @@
             "notes_concatenated": "(as of 2021-01-26T07:05:21.000Z ) \n\nHours:\nMonday - Friday 7am - 6pm\nSaturday 9am - 3pm\n\nBring a hoodie to Pilgrims Dry Cleaners during hours listed a...",
             "status": "✅",
             "automate_hours": true,
-            "testing_receiving_open_hours": [
+            "receiving_open_hours": [
                 "reczWnecVFbJ5GN4R"
             ]
         },

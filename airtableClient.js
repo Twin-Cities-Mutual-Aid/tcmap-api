@@ -14,16 +14,26 @@ const rateLimiter = new Bottleneck({
 	maxConcurrent: 1
 }) // ~1 requests per second since each of our Airtable calls actually call the api 4 times
 
-fetchRecords = async function(query) {
+async function fetchRecords(query) {
 	return base('mutual_aid_locations')
 		.select(query)
 		.all()
 }
 
-fetchHours = async function() {
+async function fetchHours() {
 	return base('hours_periods')
 		.select()
 		.all()
+}
+
+async function getHours() {
+	const wrappedAirtableCall = rateLimiter.wrap(fetchHours)
+	const result = await wrappedAirtableCall()
+		.catch((error) => {
+			throw new Error("Error fetching Airtable hours records" + error)
+	})
+
+	return result
 }
 
 module.exports = {
@@ -43,13 +53,5 @@ module.exports = {
 		return result
 	},
 
-	getHours: async function() {
-		const wrappedAirtableCall = rateLimiter.wrap(fetchHours)
-		const result = await wrappedAirtableCall()
-			.catch((error) => {
-				throw new Error("Error fetching Airtable hours records" + error)
-		})
-
-		return result
-	}
+	getHours: getHours
 }

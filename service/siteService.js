@@ -92,7 +92,7 @@ mapRecordFields = function(record, hours) {
 
 getDistributingHours = function(record, hoursRecords) {
 	if(record.fields.automate_hours) {
-		const siteOperationInfo = getSiteOperationInfo(record.fields.distributes, record.fields.testing_distributing_open_hours, hoursRecords)
+		const siteOperationInfo = getSiteOperationInfo(record.fields.distributes, record.fields.distributing_open_hours, hoursRecords)
 
 		return {
 			currentlyOpenForDistributing: siteOperationInfo.openNow,
@@ -109,7 +109,7 @@ getDistributingHours = function(record, hoursRecords) {
 
 getReceivingHours = function(record, hoursRecords) {
 	if(record.fields.automate_hours) {
-		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.testing_receiving_open_hours, hoursRecords)
+		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.receiving_open_hours, hoursRecords)
 		return {
 			currentlyOpenForReceiving: siteOperationInfo.openNow,
 			openingForReceivingDonations: siteOperationInfo.opening,
