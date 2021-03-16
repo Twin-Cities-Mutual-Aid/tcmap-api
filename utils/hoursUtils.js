@@ -94,9 +94,10 @@ function parseTodayHours(todayHours) {
         const closeTime = todayHours.close_time_digits
         const opening = DateTime.fromObject({hour: openTime.substring(0,2), minutes: openTime.substring(2,4)})
         console.log(opening.toLocaleString(DateTime.DATETIME_FULL))
-        const closing = DateTime.fromObject({hour: closeTime.substring(0,2), minutes: closeTime.substring(2,4)})
-        console.log(closing.toLocaleString(DateTime.DATETIME_FULL))
+        const closing = DateTime.fromObject({hour: closeTime.substring(0,2), minutes: closeTime.substring(2,4), zone: "America/Chicago"}).toUTC()
+        console.log(closing)
         const nowTime = DateTime.now().toUTC()
+        console.log(nowTime)
         // console.log(nowTime.toLocaleString(DateTime.DATETIME_FULL))
         const isOpenNow = checkIsOpenNow(opening, closing, nowTime)
         const openingSoon = !isOpenNow ? checkIsNearHoursStartOrEnd(opening, nowTime) : false
