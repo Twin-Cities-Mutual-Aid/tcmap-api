@@ -81,9 +81,10 @@ describe('getHoursInfo', () => {
     ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 14, 59)} | ${true}    | ${false}        | ${true}
     ${"not open now"} | ${"has hours today"}    | ${new Date(2021, 1, 25, 10, 10)} | ${false}   | ${true}         | ${false}
     `('should return site as $openStatus with summary when site "$hours" and is $openStatus', ({date, isOpenNow, openingSoon, closingSoon}) => {
-        Settings.now = () => date.valueOf()
+        Settings.now = () => date.getUTCDate().valueOf()
 
-        console.log(DateTime.now().toLocaleString(DateTime.DATETIME_FULL))
+        console.log("Test")
+        console.log(DateTime.now() )
 
         const expectedResult = {
             isOpenNow: isOpenNow,
