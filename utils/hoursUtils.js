@@ -92,7 +92,7 @@ function parseTodayHours(todayHours) {
     if (!is24Hours) {
         const openTime = todayHours.open_time_digits
         const closeTime = todayHours.close_time_digits
-        const opening = DateTime.fromObject({hour: openTime.substring(0,2), minutes: openTime.substring(2,4), zone: "America/Chicago"})
+        const opening = DateTime.fromObject({hour: openTime.substring(0,2), minutes: openTime.substring(2,4), zone: "America/Chicago"}).toUTC()
         // console.log(opening.toLocaleString(DateTime.DATETIME_FULL))
         console.log(opening)
         const closing = DateTime.fromObject({hour: closeTime.substring(0,2), minutes: closeTime.substring(2,4), zone: "America/Chicago"}).toUTC()
