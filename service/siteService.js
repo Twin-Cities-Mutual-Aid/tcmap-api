@@ -66,6 +66,7 @@ validateRecord = function(record) {
 }
 
 mapRecordFields = function(record, hours) {
+	console.log(record.fields.org_name)
 	return {
 		name: record.fields.org_name,
 		neighborhood: record.fields.neighborhood_name,
