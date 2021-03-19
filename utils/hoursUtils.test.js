@@ -77,9 +77,9 @@ describe('getHoursInfo', () => {
     // ${"not open now"} | ${"has no hours today"} | ${'2021-02-26T16:01:58.135Z'} | ${false}   | ${undefined}    | ${undefined}
     test.each`
     openStatus        | hours                   | date                             | isOpenNow  | openingSoon     | closingSoon
-    ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 12, 10)} | ${true}    | ${false}        | ${false}
-    ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 14, 59)} | ${true}    | ${false}        | ${true}
-    ${"not open now"} | ${"has hours today"}    | ${new Date(2021, 1, 25, 10, 10)} | ${false}   | ${true}         | ${false}
+    ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 17, 10)} | ${true}    | ${false}        | ${false}
+    ${"open now"}     | ${"has hours today"}    | ${new Date(2021, 1, 25, 20, 59)} | ${true}    | ${false}        | ${true}
+    ${"not open now"} | ${"has hours today"}    | ${new Date(2021, 1, 25, 16, 10)} | ${false}   | ${true}         | ${false}
     `('should return site as $openStatus with summary when site "$hours" and is $openStatus', ({date, isOpenNow, openingSoon, closingSoon}) => {
         Settings.now = () => date.getUTCDate()
 
