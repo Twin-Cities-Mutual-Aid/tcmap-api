@@ -124,8 +124,8 @@ describe('checkIsOpenNow', () => {
     `('should return $expectedResult when opening time is $openHours$openMinutes, closing time is $closeHours$closeMinutes and now is $nowHours$nowMinutes', ({openHours, openMinutes, closeHours, closeMinutes, nowHours, nowMinutes, nextDay, expectedResult}) => {
         const openTime = DateTime.fromObject({hour: openHours, minutes: openMinutes})
         const closeTime = DateTime.fromObject({hour: closeHours, minutes: closeMinutes})
-        let now = DateTime.fromObject({hour: nowHours, minutes: nowMinutes})
-        now = nextDay ? now.plus({day: 1}) : now
+        let now = DateTime.fromObject({hour: nowHours, minutes: nowMinutes, zone: "America/Chicago"})
+        now = nextDay ? now.plus({day: 1}).toUTC() : now.toUTC()
 
         let result = hoursUtils.checkIsOpenNow(openTime, closeTime, now)
         expect(result).toStrictEqual(expectedResult)
