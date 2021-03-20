@@ -125,7 +125,7 @@ function parseTodayHours(todayHours) {
 }
 
 function checkIsToday (dayDigit) {
-    const todayDigit = DateTime.now().weekday
+    const todayDigit = DateTime.now().toUTC().setZone("America/Chicago").weekday
     return todayDigit === dayDigit
 }
 
