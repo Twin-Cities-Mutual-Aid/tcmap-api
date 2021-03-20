@@ -1,7 +1,6 @@
 const airtableClient = require('../airtableClient')
 const cacheService = require('./cacheService')
 const hoursUtils = require('../utils/hoursUtils.js')
-const { DateTime, Interval } = require("luxon")
 
 
 const LIGHTRAIL_ICON = "tram"
@@ -113,10 +112,6 @@ getDistributingHours = function(record, hoursRecords) {
 getReceivingHours = function(record, hoursRecords) {
 	if(record.fields.automate_hours) {
 		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.receiving_open_hours, hoursRecords)
-		console.log(DateTime.now())
-		console.log("now")
-		console.log(DateTime.now().toHTTP())
-		console.log(siteOperationInfo)
 		return {
 			currentlyOpenForReceiving: siteOperationInfo.openNow,
 			openingForReceivingDonations: siteOperationInfo.opening,
