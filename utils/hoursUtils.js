@@ -1,10 +1,13 @@
 const { DateTime, Interval } = require("luxon")
 
+const AMERICA_CHICAGO = "America/Chicago"
+
 
 module.exports = {
     
     getHoursInfo: getHoursInfo,
     transformHours: transformHours,
+    getTodayWeekday: getTodayWeekday,
     checkIsOpenNow: checkIsOpenNow
     
 }
@@ -14,10 +17,7 @@ function getHoursInfo(periodsArray, hoursList) {
     const hoursFields = hoursRecords.map(x => x.fields)
     const schedule = getSchedule(hoursFields)
 
-    const todayDigit1 = DateTime.now().toUTC().weekday
-    const todayDigit = DateTime.now().toUTC().setZone("America/Chicago").weekday
-    console.log(`Today digit ${todayDigit}`)
-    console.log(`Today digit UTC ${todayDigit1}`)
+    const todayDigit = getTodayWeekday()
     const todayHours = hoursFields.find(period => period.open_weekday_digit == todayDigit)
     const hoursWindow = todayHours ? parseTodayHours(todayHours) : undefined
 
@@ -95,11 +95,10 @@ function parseTodayHours(todayHours) {
     if (!is24Hours) {
         const openTime = todayHours.open_time_digits
         const closeTime = todayHours.close_time_digits
-        const opening = DateTime.fromObject({hour: openTime.substring(0,2), minutes: openTime.substring(2,4), zone: "America/Chicago"}).toUTC()
-        // console.log(opening.toLocaleString(DateTime.DATETIME_FULL))
+        const opening = DateTime.fromObject({hour: openTime.substring(0,2), minutes: openTime.substring(2,4), zone: AMERICA_CHICAGO}).toUTC()
         console.log("Opening")
         console.log(opening)
-        const closing = DateTime.fromObject({hour: closeTime.substring(0,2), minutes: closeTime.substring(2,4), zone: "America/Chicago"}).toUTC()
+        const closing = DateTime.fromObject({hour: closeTime.substring(0,2), minutes: closeTime.substring(2,4), zone: AMERICA_CHICAGO}).toUTC()
         console.log("Closing")
         console.log(closing)
         const nowTime = DateTime.now().toUTC()
@@ -124,8 +123,12 @@ function parseTodayHours(todayHours) {
     }
 }
 
-function checkIsToday (dayDigit) {
-    const todayDigit = DateTime.now().toUTC().setZone("America/Chicago").weekday
+function getTodayWeekday() {
+    return DateTime.now().toUTC().setZone(AMERICA_CHICAGO).weekday
+}
+
+function checkIsToday(dayDigit) {
+    const todayDigit = getTodayWeekday()
     return todayDigit === dayDigit
 }
 
