@@ -14,7 +14,10 @@ function getHoursInfo(periodsArray, hoursList) {
     const hoursFields = hoursRecords.map(x => x.fields)
     const schedule = getSchedule(hoursFields)
 
-    const todayDigit = DateTime.now().toUTC().weekday
+    const todayDigit1 = DateTime.now().toUTC().weekday
+    const todayDigit = DateTime.now().toUTC().setZone("America/Chicago").weekday
+    console.log(`Today digit ${todayDigit}`)
+    console.log(`Today digit UTC ${todayDigit1}`)
     const todayHours = hoursFields.find(period => period.open_weekday_digit == todayDigit)
     const hoursWindow = todayHours ? parseTodayHours(todayHours) : undefined
 
