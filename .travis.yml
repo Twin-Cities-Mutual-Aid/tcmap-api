@@ -2,4 +2,3 @@ language: node_js
 
 before_install:
 - export TZ=Etc/UTC
-- date
