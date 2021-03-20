@@ -20,8 +20,10 @@ const expectedResult = [{ name: "10k Hoodies- Bloomington", neighborhood: ["Sout
 describe("getMutualAidSites", () => {
     afterEach(() => jest.resetAllMocks());
 
+    // Settings.resetCaches()
+
     it('should return all properties accurately mapped', async () => {
-        Settings.now = () => new Date(2021, 1, 25, 12, 10).valueOf()
+        Settings.now = () => Date.UTC(2021, 1, 25, 17, 10)
 
         airtableClientMock.getMutualAidSites.mockResolvedValue(testSites)
         airtableClientMock.getHours.mockResolvedValue(testHours)
