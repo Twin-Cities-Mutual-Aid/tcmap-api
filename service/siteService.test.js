@@ -25,7 +25,6 @@ describe("getMutualAidSites", () => {
 
         airtableClientMock.getMutualAidSites.mockResolvedValue(testSites)
         airtableClientMock.getHours.mockResolvedValue(testHours)
-        // airtableClientMock.getTimes.mockResolvedValue(testHours)
 
         let result = await siteService.getMutualAidSites("/v1/mutual_aid_sites")
 

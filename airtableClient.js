@@ -20,27 +20,11 @@ async function fetchRecords(query) {
 		.all()
 }
 
-// async function fetchHours() {
-// 	return base('hours_periods')
-// 		.select()
-// 		.all()
-// }
-
 async function fetchHours() {
 	return base('hours_periods_test')
 		.select()
 		.all()
 }
-
-// async function getHours() {
-// 	const wrappedAirtableCall = rateLimiter.wrap(fetchHours)
-// 	const result = await wrappedAirtableCall()
-// 		.catch((error) => {
-// 			throw new Error("Error fetching Airtable hours records" + error)
-// 	})
-
-// 	return result
-// }
 
 async function getHours() {
 	const wrappedAirtableCall = rateLimiter.wrap(fetchHours)
@@ -69,6 +53,6 @@ module.exports = {
 		return result
 	},
 
-	getHours: getHours,
-	// getTimes: getTimes
+	getHours: getHours
+
 }

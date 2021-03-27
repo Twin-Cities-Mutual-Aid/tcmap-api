@@ -12,23 +12,14 @@ module.exports = {
     
 }
 
-function getHoursInfo(periodsArray, openHours, closeHours, hoursList, timesList) {
+function getHoursInfo(openHours, closeHours, hoursList) {
     const openHoursRecords = openHours.map( id => hoursList.find(x => x.id == id))
     const openHoursFields = openHoursRecords.map(x => x.fields)
     const closeHoursRecords = closeHours.map( id => hoursList.find(x => x.id == id))
     const closeHoursFields = closeHoursRecords.map(x => x.fields)
-
-    // TODO - Remove
-    // const hoursRecords = periodsArray.map( id => hoursList.find(x => x.id == id))
-    // const hoursFields = hoursRecords.map(x => x.fields)
-    //
-
-    // const schedule = getSchedule(hoursFields, openHoursFields, closeHoursFields)
     const schedule = getSchedule(openHoursFields, closeHoursFields)
 
     const todayDigit = getTodayWeekday()
-
-    // const todayHours = hoursFields.find(period => period.open_weekday_digit == todayDigit)
     const todayOpenHours = openHoursFields.find(period => period.weekday_digit == todayDigit)
     const todayCloseHours = closeHoursFields.find(period => period.weekday_digit == todayDigit)
     const hoursWindow = (todayOpenHours && todayCloseHours) ? parseTodayHours(todayOpenHours, todayCloseHours) : undefined
@@ -60,10 +51,7 @@ function transformHours(time) {
     }
 }
 
-
-// function getSchedule(hoursFields, openHoursFields, closeHoursFields) {
 function getSchedule(openHoursFields, closeHoursFields) {
-
     const openHours = openHoursFields.map( hours => {
         return {
             weekdayDigit: hours.weekday_digit,
@@ -81,43 +69,21 @@ function getSchedule(openHoursFields, closeHoursFields) {
         }
     })
 
-    // console.log(openHours)
-    // console.log(closeHours)
-
-
-    const formattedHours = []
-
-    // const formattedHours = hoursFields.map(field => 
-    //     {
-    //         return {
-    //             weekdayDigit: field.open_weekday_digit,
-    //             openTime: field.open_time,
-    //             openTimeDigits: field.open_time_digits, // 4-digit string of number from 0000 to 2359
-    //             closeTime: field.close_time,
-    //             closeTimeDigits: field.close_time_digits, // 4-digit string of number from 0000 to 2359
-    //         }
-    //     }
-    // )
-
     return [
-        getDaySchedule("sunday", 0, formattedHours, openHours, closeHours),
-        getDaySchedule("monday", 1, formattedHours, openHours, closeHours),
-        getDaySchedule("tuesday", 2, formattedHours, openHours, closeHours),
-        getDaySchedule("wednesday", 3, formattedHours, openHours, closeHours),
-        getDaySchedule("thursday", 4, formattedHours, openHours, closeHours),
-        getDaySchedule("friday", 5, formattedHours, openHours, closeHours),
-        getDaySchedule("saturday", 6, formattedHours, openHours, closeHours)
+        getDaySchedule("sunday", 0, openHours, closeHours),
+        getDaySchedule("monday", 1, openHours, closeHours),
+        getDaySchedule("tuesday", 2, openHours, closeHours),
+        getDaySchedule("wednesday", 3, openHours, closeHours),
+        getDaySchedule("thursday", 4, openHours, closeHours),
+        getDaySchedule("friday", 5, openHours, closeHours),
+        getDaySchedule("saturday", 6, openHours, closeHours)
     ]
 }
 
-function getDaySchedule(weekday, dayDigit, formattedHours, formattedOpenHours, formattedCloseHours) {
+function getDaySchedule(weekday, dayDigit, formattedOpenHours, formattedCloseHours) {
     const openHours = (formattedOpenHours.find( ({ weekdayDigit }) => weekdayDigit === dayDigit ) || undefined)
     const closeHours = (formattedCloseHours.find( ({ weekdayDigit }) => weekdayDigit === dayDigit ) || undefined)
-    // const hours = (formattedHours.find( ({ weekdayDigit }) => weekdayDigit === dayDigit ) || undefined)
     let is24Hours = false
-    // if(hours) {
-    //     is24Hours = check24Hours(hours.openTimeDigits, hours.closeTimeDigits)
-    // }
     if(openHours && closeHours) {
         is24Hours = check24Hours(openHours.timeDigits, closeHours.timeDigits)
     }
@@ -125,9 +91,7 @@ function getDaySchedule(weekday, dayDigit, formattedHours, formattedOpenHours, f
     return {
         day: weekday,
         dayDigit: dayDigit,
-        // openTime: hours ? hours.openTime : undefined,
         openTime: openHours ? openHours.time : undefined,
-        // closeTime: hours ? hours.closeTime : undefined,
         closeTime: closeHours ? closeHours.time : undefined,
         is24Hours: is24Hours,
         isToday: checkIsToday(dayDigit),
@@ -135,24 +99,14 @@ function getDaySchedule(weekday, dayDigit, formattedHours, formattedOpenHours, f
 }
 
 function parseTodayHours(todayOpenHours, todayCloseHours) {
-    // const is24Hours = todayHours ? check24Hours(todayHours.open_time_digits, todayHours.close_time_digits) : false
     const is24Hours = check24Hours(todayOpenHours.time_digits, todayCloseHours.time_digits)
     
     if (!is24Hours) {
-        // const openTime = todayHours.open_time_digits
         const openTime = todayOpenHours.time_digits
-        // const closeTime = todayHours.close_time_digits
         const closeTime = todayCloseHours.time_digits
         const opening = DateTime.fromObject({hour: openTime.substring(0,2), minutes: openTime.substring(2,4), zone: AMERICA_CHICAGO}).toUTC()
-        console.log("Opening")
-        console.log(opening)
         const closing = DateTime.fromObject({hour: closeTime.substring(0,2), minutes: closeTime.substring(2,4), zone: AMERICA_CHICAGO}).toUTC()
-        console.log("Closing")
-        console.log(closing)
         const nowTime = DateTime.now().toUTC()
-        console.log("now")
-        console.log(nowTime)
-        // console.log(nowTime.toLocaleString(DateTime.DATETIME_FULL))
         const isOpenNow = checkIsOpenNow(opening, closing, nowTime)
         const openingSoon = !isOpenNow ? checkIsNearHoursStartOrEnd(opening, nowTime) : false
         const closingSoon = isOpenNow ? checkIsNearHoursStartOrEnd(closing, nowTime) : false
@@ -181,7 +135,6 @@ function checkIsToday(dayDigit) {
 }
 
 function check24Hours(open, close) {
-    // return (open && !close) ? true : false
     return (open === "0000" && close === "0000")
 }
 
