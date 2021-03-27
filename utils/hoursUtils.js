@@ -135,7 +135,7 @@ function checkIsToday(dayDigit) {
 }
 
 function check24Hours(open, close) {
-    return (open === "0000" && close === "0000")
+    return (open === "0000" && close === "0000") // If both are midnight - "0000" means midnight 
 }
 
 function checkIsOpenNow(openTime, closeTime, nowTime) {
