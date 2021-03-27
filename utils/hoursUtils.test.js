@@ -11,16 +11,32 @@ describe('getHoursInfo', () => {
         "rec3nv0GVDNPQzs32",
         "recuq0G9dcDh0fIFS"
     ]
+    const openHours = [
+        "recS2hDlNsJgG9Kqn",
+        "recSpjdkWPkmzjc95",
+        "recSpjdkWPkmzjc96",
+        "recS2hDlNsJgG9Kqm",
+
+
+    ]
+
+    const closeHours = [
+        "recSpjdkWPkmzjc95",
+        "recSpjdkWPkmzjc96",
+        "rect49hsKqi2NLrOx",
+        "rect49hsKqi2NLrOZ",
+
+    ]
 
     test.each`
     openStatus        | hours                   | date                             | isOpenNow  | openingSoon  | closingSoon  | expectedHours
-    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 6, 10)}  | ${false}   | ${false}     | ${false}     | ${getExpectedHours()}
+    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${true}    | ${false}     | ${false}      | ${getExpectedHours(true, false, false)}
+    ${"not open now"} | ${"has no hours today"} | ${Date.UTC(2021, 1, 26, 20, 10)} | ${false}   | ${undefined} | ${undefined} | ${getExpectedHours(false, false, true)}
+    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 26, 4, 10)}  | ${false}   | ${false}     | ${false}     | ${getExpectedHours()}
+    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 16, 10)} | ${false}   | ${true}      | ${false}     | ${getExpectedHours()}
     ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 17, 10)} | ${true}    | ${false}     | ${false}     | ${getExpectedHours()}
     ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 20, 59)} | ${true}    | ${false}     | ${true}      | ${getExpectedHours()}
-    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 16, 10)} | ${false}   | ${true}      | ${false}     | ${getExpectedHours()}
-    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 26, 4, 10)}  | ${false}   | ${false}     | ${false}     | ${getExpectedHours()}
-    ${"not open now"} | ${"has no hours today"} | ${Date.UTC(2021, 1, 26, 20, 10)} | ${false}   | ${undefined} | ${undefined} | ${getExpectedHours(false, false, true)}
-    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${true}    | ${false}     | ${false}      | ${getExpectedHours(true, false, false)}
+    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 6, 10)}  | ${false}   | ${false}     | ${false}     | ${getExpectedHours()}
     `('should return site as $openStatus with summary when site "$hours" and is $openStatus', ({date, isOpenNow, openingSoon, closingSoon, expectedHours}) => {
         Settings.now = () => date
 
@@ -30,7 +46,7 @@ describe('getHoursInfo', () => {
             closingSoon: closingSoon,
             ...expectedHours
         }
-        const result = hoursUtils.getHoursInfo(periodsArray, testHours)
+        const result = hoursUtils.getHoursInfo(periodsArray, openHours, closeHours, testHours, testHours)
         expect(result).toStrictEqual(expectedResult)
     })
 })

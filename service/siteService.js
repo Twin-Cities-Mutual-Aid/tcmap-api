@@ -34,6 +34,13 @@ module.exports = {
 						return cacheService.readCache(cachePath, true)
 					})
 
+				// const times = await airtableClient.getTimes()
+				// 	.catch( e => {
+				// 		console.error("There was an error getting times: " + e.message)
+				// 		// TODO: Send slack? alert so there's visibility into the error!!
+				// 		return cacheService.readCache(cachePath, true)
+				// 	})
+
 				const siteRecords = await airtableClient.getMutualAidSites()
 					.catch( e => {
 						console.error("There was an error getting mutual aid sites: " + e.message)
@@ -67,7 +74,7 @@ validateRecord = function(record) {
 }
 
 mapRecordFields = function(record, hours) {
-	console.log(record.fields.org_name)
+	// console.log(record.fields.org_name)
 	return {
 		name: record.fields.org_name,
 		neighborhood: record.fields.neighborhood_name,
@@ -92,9 +99,9 @@ mapRecordFields = function(record, hours) {
 	}
 }
 
-getDistributingHours = function(record, hoursRecords) {
+getDistributingHours = function(record, hoursRecords, timesRecords) {
 	if(record.fields.automate_hours) {
-		const siteOperationInfo = getSiteOperationInfo(record.fields.distributes, record.fields.distributing_open_hours, hoursRecords)
+		const siteOperationInfo = getSiteOperationInfo(record.fields.distributes, record.fields.distributing_open_hours, record.fields.distributing_open, record.fields.distributing_close, hoursRecords)
 
 		return {
 			currentlyOpenForDistributing: siteOperationInfo.openNow,
@@ -109,9 +116,9 @@ getDistributingHours = function(record, hoursRecords) {
 	}
 }
 
-getReceivingHours = function(record, hoursRecords) {
+getReceivingHours = function(record, hoursRecords, timesRecords) {
 	if(record.fields.automate_hours) {
-		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.receiving_open_hours, hoursRecords)
+		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.receiving_open_hours, record.fields.receiving_open, record.fields.receiving_close, hoursRecords)
 		return {
 			currentlyOpenForReceiving: siteOperationInfo.openNow,
 			openingForReceivingDonations: siteOperationInfo.opening,
@@ -126,14 +133,15 @@ getReceivingHours = function(record, hoursRecords) {
 	}
 }
 
-getSiteOperationInfo = function(isOperationEnabled, operationOpenHours, hoursList) {
+getSiteOperationInfo = function(isOperationEnabled, operationOpenHours, operationOpenHoursArray, operationCloseHoursArray, hoursList) {
 	let openNow = NO
 	let opening = NEVER
 	let closing = undefined
 	let operationHours = undefined
 	let isEnabled = isOperationEnabled ? true : false
 	if(isOperationEnabled) {
-		operationHours = operationOpenHours ? hoursUtils.getHoursInfo(operationOpenHours, hoursList) : undefined
+		// operationHours = operationOpenHours ? hoursUtils.getHoursInfo(operationOpenHours, hoursList) : undefined
+		operationHours = (operationOpenHoursArray && operationCloseHoursArray) ? hoursUtils.getHoursInfo(operationOpenHours, operationOpenHoursArray, operationCloseHoursArray, hoursList) : undefined
 		const today = operationHours ? operationHours.hours.find( ({ isToday }) => isToday === true ) : undefined
 		openNow = operationHours ? (operationHours.isOpenNow ? YES : NO) : undefined
 		opening = today ? today.openTime : NOT_TODAY

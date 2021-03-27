@@ -71,6 +71,12 @@
             "automate_hours": true,
             "receiving_open_hours": [
                 "reczWnecVFbJ5GN4R"
+            ],
+            "receiving_open": [
+                "recS2hDlNsJgG9Kqn"
+            ],
+            "receiving_close": [
+                "rect49hsKqi2NLrOx"
             ]
         },
         "createdTime": "2020-10-25T00:11:30.000Z"
