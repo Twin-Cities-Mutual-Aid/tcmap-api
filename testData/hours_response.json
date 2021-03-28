@@ -89,5 +89,18 @@
       "weekday_digit": 4
     },
     "createdTime": "2021-03-27T02:51:30.000Z"
+  },
+  {
+    "id": "rect49hsKqi2NLrO1",
+    "fields": {
+      "weekday": "Sunday",
+      "time_digits": "0000",
+      "mutual_aid_locations 3 copy 2": ["recauetyuXpY6jSrl"],
+      "time_12_hour": "2021-03-27T00:00:00.000Z",
+      "time": "12:00AM",
+      "summary": "Sunday 12:00AM",
+      "weekday_digit": 0
+    },
+    "createdTime": "2021-03-27T02:51:30.000Z"
   }
 ]
