@@ -21,7 +21,7 @@ async function fetchRecords(query) {
 }
 
 async function fetchHours() {
-	return base('hours_periods')
+	return base('hours_periods_test')
 		.select()
 		.all()
 }
@@ -54,4 +54,5 @@ module.exports = {
 	},
 
 	getHours: getHours
+
 }

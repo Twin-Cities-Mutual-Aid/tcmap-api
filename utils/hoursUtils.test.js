@@ -5,11 +5,17 @@ const hoursUtils = require('./hoursUtils')
 const testHours = require('../testData/hours_response.json')
 
 describe('getHoursInfo', () => {
-    const periodsArray = [
-        "recmmC9oshIcu35c3",
-        "reczWnecVFbJ5GN4R",
-        "rec3nv0GVDNPQzs32",
-        "recuq0G9dcDh0fIFS"
+    const openHours = [
+        "recS2hDlNsJgG9Kqn",
+        "recSpjdkWPkmzjc95",
+        "recSpjdkWPkmzjc96",
+        "recS2hDlNsJgG9Kqm",
+    ]
+    const closeHours = [
+        "recSpjdkWPkmzjc95",
+        "recSpjdkWPkmzjc96",
+        "rect49hsKqi2NLrOx",
+        "rect49hsKqi2NLrOZ",
     ]
 
     test.each`
@@ -30,7 +36,7 @@ describe('getHoursInfo', () => {
             closingSoon: closingSoon,
             ...expectedHours
         }
-        const result = hoursUtils.getHoursInfo(periodsArray, testHours)
+        const result = hoursUtils.getHoursInfo(openHours, closeHours, testHours)
         expect(result).toStrictEqual(expectedResult)
     })
 })

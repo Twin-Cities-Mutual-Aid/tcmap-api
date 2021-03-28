@@ -66,8 +66,7 @@ validateRecord = function(record) {
 	return has_org && has_lng && has_lat && has_color
 }
 
-mapRecordFields = function(record, hours) {
-	console.log(record.fields.org_name)
+function mapRecordFields(record, hours) {
 	return {
 		name: record.fields.org_name,
 		neighborhood: record.fields.neighborhood_name,
@@ -92,9 +91,9 @@ mapRecordFields = function(record, hours) {
 	}
 }
 
-getDistributingHours = function(record, hoursRecords) {
+function getDistributingHours(record, hoursRecords) {
 	if(record.fields.automate_hours) {
-		const siteOperationInfo = getSiteOperationInfo(record.fields.distributes, record.fields.distributing_open_hours, hoursRecords)
+		const siteOperationInfo = getSiteOperationInfo(record.fields.distributes, record.fields.distributing_open, record.fields.distributing_close, hoursRecords)
 
 		return {
 			currentlyOpenForDistributing: siteOperationInfo.openNow,
@@ -109,9 +108,9 @@ getDistributingHours = function(record, hoursRecords) {
 	}
 }
 
-getReceivingHours = function(record, hoursRecords) {
+function getReceivingHours(record, hoursRecords) {
 	if(record.fields.automate_hours) {
-		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.receiving_open_hours, hoursRecords)
+		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.receiving_open, record.fields.receiving_close, hoursRecords)
 		return {
 			currentlyOpenForReceiving: siteOperationInfo.openNow,
 			openingForReceivingDonations: siteOperationInfo.opening,
@@ -126,14 +125,14 @@ getReceivingHours = function(record, hoursRecords) {
 	}
 }
 
-getSiteOperationInfo = function(isOperationEnabled, operationOpenHours, hoursList) {
+function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, operationCloseHoursArray, hoursList) {
 	let openNow = NO
 	let opening = NEVER
 	let closing = undefined
 	let operationHours = undefined
 	let isEnabled = isOperationEnabled ? true : false
 	if(isOperationEnabled) {
-		operationHours = operationOpenHours ? hoursUtils.getHoursInfo(operationOpenHours, hoursList) : undefined
+		operationHours = (operationOpenHoursArray && operationCloseHoursArray) ? hoursUtils.getHoursInfo(operationOpenHoursArray, operationCloseHoursArray, hoursList) : undefined
 		const today = operationHours ? operationHours.hours.find( ({ isToday }) => isToday === true ) : undefined
 		openNow = operationHours ? (operationHours.isOpenNow ? YES : NO) : undefined
 		opening = today ? today.openTime : NOT_TODAY
