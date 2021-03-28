@@ -10,12 +10,14 @@ describe('getHoursInfo', () => {
         "recSpjdkWPkmzjc95",
         "recSpjdkWPkmzjc96",
         "recS2hDlNsJgG9Kqm",
+        "rect49hsKqi2NLrO1"
     ]
     const closeHours = [
         "recSpjdkWPkmzjc95",
         "recSpjdkWPkmzjc96",
         "rect49hsKqi2NLrOx",
         "rect49hsKqi2NLrOZ",
+        "rect49hsKqi2NLrO1"
     ]
 
     test.each`
@@ -26,7 +28,8 @@ describe('getHoursInfo', () => {
     ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 16, 10)} | ${false}   | ${true}      | ${false}     | ${getExpectedHours()}
     ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 26, 4, 10)}  | ${false}   | ${false}     | ${false}     | ${getExpectedHours()}
     ${"not open now"} | ${"has no hours today"} | ${Date.UTC(2021, 1, 26, 20, 10)} | ${false}   | ${undefined} | ${undefined} | ${getExpectedHours(false, false, true)}
-    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${true}    | ${false}     | ${false}      | ${getExpectedHours(true, false, false)}
+    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${true}    | ${false}     | ${false}     | ${getExpectedHours(true, false, false)}
+    ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 28, 10, 59)} | ${true}    | ${false}     | ${false}     | ${getExpectedHours(false, false, false, false, true)}
     `('should return site as $openStatus with summary when site "$hours" and is $openStatus', ({date, isOpenNow, openingSoon, closingSoon, expectedHours}) => {
         Settings.now = () => date
 
@@ -62,6 +65,7 @@ describe('getTodayWeekday', () => {
     ${Date.UTC(2021, 1, 25, 23, 59)} | ${4}
     ${Date.UTC(2021, 1, 26, 4, 59)}  | ${4}
     ${Date.UTC(2021, 1, 26, 6, 0)}   | ${5}
+    ${Date.UTC(2021, 1, 28, 6, 0)}   | ${0}
     `('should return weekday as $weekday when todays date is $date', ({date, weekday}) => {
         Settings.now = () => date
 
@@ -105,9 +109,9 @@ function getExpectedHours(
             {
                 day: 'sunday',
                 dayDigit: 0,
-                openTime: undefined,
-                closeTime: undefined,
-                is24Hours: false,
+                openTime: '12:00AM',
+                closeTime: '12:00AM',
+                is24Hours: true,
                 isToday: sundayIsToday,
             },
             {

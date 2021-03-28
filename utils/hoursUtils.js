@@ -65,7 +65,6 @@ function getSchedule(openHoursFields, closeHoursFields) {
             weekdayDigit: hours.weekday_digit,
             time: hours.time,
             timeDigits: hours.time_digits, // 4-digit string of number from 0000 to 2359
-
         }
     })
 
@@ -126,7 +125,9 @@ function parseTodayHours(todayOpenHours, todayCloseHours) {
 }
 
 function getTodayWeekday() {
-    return DateTime.now().toUTC().setZone(AMERICA_CHICAGO).weekday
+    const weekday = DateTime.now().toUTC().setZone(AMERICA_CHICAGO).weekday
+    if(weekday == 7) return 0
+    return weekday
 }
 
 function checkIsToday(dayDigit) {
