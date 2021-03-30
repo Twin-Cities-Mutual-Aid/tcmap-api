@@ -54,19 +54,23 @@ module.exports = {
 	},
 
 	transformPublicTransit: transformPublicTransit,
-	getWarmingSiteStatus: getWarmingSiteStatus
+	getWarmingSiteStatus: getWarmingSiteStatus,
+	getColor: getColor
 }
 
 validateRecord = function(record) {
 	const has_org = record.fields.org_name !== ''
 	const has_lng = record.fields.longitude !== undefined
 	const has_lat = record.fields.latitude !== undefined
-	const has_color = record.fields.color !== undefined
 
-	return has_org && has_lng && has_lat && has_color
+	return has_org && has_lng && has_lat 
 }
 
 function mapRecordFields(record, hours) {
+	const distributingHours = getDistributingHours(record, hours)
+	const receivingHours = getReceivingHours(record, hours)
+	const color = getColor(distributingHours.currentlyOpenForDistributing, receivingHours.currentlyOpenForReceiving)
+
 	return {
 		name: record.fields.org_name,
 		neighborhood: record.fields.neighborhood_name,
@@ -74,8 +78,8 @@ function mapRecordFields(record, hours) {
 		longitude: record.fields.longitude,
 		latitude: record.fields.latitude,
 		mostRecentlyUpdatedAt: record.fields.last_updated,
-		...getDistributingHours(record, hours),
-		...getReceivingHours(record, hours),
+		...distributingHours,
+		...receivingHours,
 		urgentNeed: record.fields.urgent_need,
 		seekingMoney: record.fields.seeking_money,
 		seekingMoneyURL: record.fields.seeking_money_url,
@@ -87,7 +91,7 @@ function mapRecordFields(record, hours) {
 		notAccepting: record.fields.not_accepting,
 		seekingVolunteers: record.fields.seeking_volunteers,
 		notes: record.fields.notes,
-		color: record.fields.color
+		color: color
 	}
 }
 
@@ -194,5 +198,19 @@ getTransitOption = function(properties) {
 			return { routeName: routeName, backgroundColor: PURPLE, icon: BUS_ICON, distance: distance, altText: `${routeName} bus, ${distance} away` }
 		default:
 			return
+	}
+}
+
+function getColor(currentlyOpenForDistributing, currentlyOpenForReceiving) {
+    if(currentlyOpenForDistributing === "yes") {
+		if(currentlyOpenForReceiving === "yes") {
+			return "#9f48ea"
+		} else {
+			return "#03bafc"
+		}
+	} else if(currentlyOpenForReceiving === "yes") {
+		return "#fc03df"
+	} else {
+		return "#c70000"
 	}
 }
