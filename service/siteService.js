@@ -62,7 +62,6 @@ validateRecord = function(record) {
 	const has_org = record.fields.org_name !== ''
 	const has_lng = record.fields.longitude !== undefined
 	const has_lat = record.fields.latitude !== undefined
-	// const has_color = record.fields.color !== undefined
 
 	return has_org && has_lng && has_lat 
 }
