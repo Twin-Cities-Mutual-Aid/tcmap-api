@@ -58,7 +58,7 @@ module.exports = {
 	getColor: getColor
 }
 
-validateRecord = function(record) {
+function validateRecord(record) {
 	const has_org = record.fields.org_name !== ''
 	const has_lng = record.fields.longitude !== undefined
 	const has_lat = record.fields.latitude !== undefined
@@ -169,7 +169,7 @@ function transformPublicTransit(publicTransitOptions) {
  * 
  *  @param {array} publicTransitOptions - The list of public transit options, each in the format [name/#]-[BLUELINE/GREENLINE/BUS]-([#] blocks)
  */
-getPublicTransit = function(publicTransitOptions) {
+ function getPublicTransit(publicTransitOptions) {
 	let options = []
 	if(publicTransitOptions) {
 		publicTransitOptions.forEach(function(transitOption) {
@@ -184,7 +184,7 @@ getPublicTransit = function(publicTransitOptions) {
 	return options.length > 0 ? options : undefined
 }
 
-getTransitOption = function(properties) {
+function getTransitOption(properties) {
 	const routeName = properties[0]
 	const type = properties[1]
 	const distance = properties[2]
