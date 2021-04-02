@@ -42,6 +42,7 @@ module.exports = {
 		const direction = 'asc'
 		const query = {
 			sort: [{field, direction}],
+			filterByFormula: 'inactive = 0'
 		}
 
 		const wrappedAirtableCall = rateLimiter.wrap(fetchRecords);
