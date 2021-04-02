@@ -104,16 +104,3 @@ describe("getWarmingSiteStatus", () => {
         expect(result).toStrictEqual(undefined)
     })
 })
-
-describe('getColor', () => {
-    test.each`
-        distributingNow | receivingNow | expectedColor          
-        ${"yes"}        | ${"yes"}     | ${"#9f48ea"}      
-        ${"yes"}        | ${"no"}      | ${"#03bafc"}      
-        ${"no"}         | ${"yes"}     | ${"#fc03df"} 
-        ${"no"}         | ${"no"}      | ${"#c70000"} 
-    `('should return $expectedColor when currentlyOpenForDistributing: $distributingNow and currentlyOpenForReceiving: $receivingNow', ({distributingNow, receivingNow, expectedColor}) => {
-        let result = siteService.getColor(distributingNow, receivingNow)
-        expect(result).toStrictEqual(expectedColor)
-    })
-})

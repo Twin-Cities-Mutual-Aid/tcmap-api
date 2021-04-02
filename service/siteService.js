@@ -54,8 +54,7 @@ module.exports = {
 	},
 
 	transformPublicTransit: transformPublicTransit,
-	getWarmingSiteStatus: getWarmingSiteStatus,
-	getColor: getColor
+	getWarmingSiteStatus: getWarmingSiteStatus
 }
 
 function validateRecord(record) {
