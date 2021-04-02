@@ -169,7 +169,7 @@ function transformPublicTransit(publicTransitOptions) {
  * 
  *  @param {array} publicTransitOptions - The list of public transit options, each in the format [name/#]-[BLUELINE/GREENLINE/BUS]-([#] blocks)
  */
- function getPublicTransit(publicTransitOptions) {
+function getPublicTransit(publicTransitOptions) {
 	let options = []
 	if(publicTransitOptions) {
 		publicTransitOptions.forEach(function(transitOption) {
