@@ -54,8 +54,7 @@ module.exports = {
 	},
 
 	transformPublicTransit: transformPublicTransit,
-	getWarmingSiteStatus: getWarmingSiteStatus,
-	getColor: getColor
+	getWarmingSiteStatus: getWarmingSiteStatus
 }
 
 function validateRecord(record) {
@@ -69,7 +68,6 @@ function validateRecord(record) {
 function mapRecordFields(record, hours) {
 	const distributingHours = getDistributingHours(record, hours)
 	const receivingHours = getReceivingHours(record, hours)
-	const color = getColor(distributingHours.currentlyOpenForDistributing, receivingHours.currentlyOpenForReceiving)
 
 	return {
 		name: record.fields.org_name,
@@ -90,8 +88,7 @@ function mapRecordFields(record, hours) {
 		accepting: record.fields.accepting,
 		notAccepting: record.fields.not_accepting,
 		seekingVolunteers: record.fields.seeking_volunteers,
-		notes: record.fields.notes,
-		color: color
+		notes: record.fields.notes
 	}
 }
 
@@ -198,19 +195,5 @@ function getTransitOption(properties) {
 			return { routeName: routeName, backgroundColor: PURPLE, icon: BUS_ICON, distance: distance, altText: `${routeName} bus, ${distance} away` }
 		default:
 			return
-	}
-}
-
-function getColor(currentlyOpenForDistributing, currentlyOpenForReceiving) {
-    if(currentlyOpenForDistributing === "yes") {
-		if(currentlyOpenForReceiving === "yes") {
-			return "#9f48ea"
-		} else {
-			return "#03bafc"
-		}
-	} else if(currentlyOpenForReceiving === "yes") {
-		return "#fc03df"
-	} else {
-		return "#c70000"
 	}
 }
