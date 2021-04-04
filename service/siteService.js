@@ -94,7 +94,7 @@ function mapRecordFields(record, hours) {
 
 function getDistributingHours(record, hoursRecords) {
 	if(record.fields.automate_hours) {
-		const siteOperationInfo = getSiteOperationInfo(record.fields.distributes, record.fields.distributing_open, record.fields.distributing_close, hoursRecords)
+		const siteOperationInfo = getSiteOperationInfo(record.fields.distributes, record.fields.distributing_open, record.fields.distributing_close, hoursRecords, record.fields.closed_dates)
 
 		return {
 			currentlyOpenForDistributing: siteOperationInfo.openNow,
@@ -105,13 +105,13 @@ function getDistributingHours(record, hoursRecords) {
 	return {
 		currentlyOpenForDistributing: record.fields.currently_open_for_distributing,
 		openingForDistributingDonations: hoursUtils.transformHours(record.fields.opening_for_distributing),
-		closingForDistributingDonations: hoursUtils.transformHours(record.fields.closing_for_distributing),
+		closingForDistributingDonations: hoursUtils.transformHours(record.fields.closing_for_distributing)
 	}
 }
 
 function getReceivingHours(record, hoursRecords) {
 	if(record.fields.automate_hours) {
-		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.receiving_open, record.fields.receiving_close, hoursRecords)
+		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.receiving_open, record.fields.receiving_close, hoursRecords, record.fields.closed_dates)
 		return {
 			currentlyOpenForReceiving: siteOperationInfo.openNow,
 			openingForReceivingDonations: siteOperationInfo.opening,
@@ -122,22 +122,34 @@ function getReceivingHours(record, hoursRecords) {
 	return {
 		currentlyOpenForReceiving: record.fields.currently_open_for_receiving,
 		openingForReceivingDonations: hoursUtils.transformHours(record.fields.opening_for_receiving),
-		closingForReceivingDonations:  hoursUtils.transformHours(record.fields.closing_for_receiving),
+		closingForReceivingDonations:  hoursUtils.transformHours(record.fields.closing_for_receiving)
 	}
 }
 
-function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, operationCloseHoursArray, hoursList) {
+function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, operationCloseHoursArray, hoursList, closedDates) {
 	let openNow = NO
 	let opening = NEVER
 	let closing = undefined
 	let operationHours = undefined
+	let schedule = undefined
 	let isEnabled = isOperationEnabled ? true : false
 	if(isOperationEnabled) {
-		operationHours = (operationOpenHoursArray && operationCloseHoursArray) ? hoursUtils.getHoursInfo(operationOpenHoursArray, operationCloseHoursArray, hoursList) : undefined
-		const today = operationHours ? operationHours.hours.find( ({ isToday }) => isToday === true ) : undefined
-		openNow = operationHours ? (operationHours.isOpenNow ? YES : NO) : undefined
-		opening = today ? today.openTime : NOT_TODAY
-		closing = today ? today.closeTime : undefined
+		schedule = (operationOpenHoursArray && operationCloseHoursArray) ? hoursUtils.getSchedule(operationOpenHoursArray, operationCloseHoursArray, hoursList) : undefined
+
+		const isClosedToday = closedDates ? hoursUtils.checkIsClosedToday(closedDates) : false
+		if(!isClosedToday) {
+			const today = schedule ? schedule.find( ({ isToday }) => isToday === true ) : undefined
+			
+			operationHours = today ? hoursUtils.getHoursInfo(today.hours.openTimeDigits, today.hours.closeTimeDigits) : undefined
+
+			openNow = operationHours ? (operationHours.isOpenNow ? YES : NO) : undefined
+			opening = today ? today.hours.openTime : NOT_TODAY
+			closing = today ? today.hours.closeTime : undefined
+		} else {
+			openNow = NO
+			opening = NOT_TODAY
+			closing = undefined
+		}
 	}
 	
 	return {
@@ -145,7 +157,8 @@ function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, opera
 		openNow: openNow,
 		opening: opening,
 		closing: closing,
-		hoursInfo: operationHours
+		hoursInfo: operationHours,
+		schedule: schedule
 	}
 }
 
