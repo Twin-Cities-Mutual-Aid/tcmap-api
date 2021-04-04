@@ -130,7 +130,7 @@ function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, opera
 	let openNow = NO
 	let opening = NEVER
 	let closing = undefined
-	let operationHours = undefined
+	let operationHoursInfo = undefined
 	let schedule = undefined
 	let isEnabled = isOperationEnabled ? true : false
 	if(isOperationEnabled) {
@@ -139,10 +139,9 @@ function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, opera
 		const isClosedToday = closedDates ? hoursUtils.checkIsClosedToday(closedDates) : false
 		if(!isClosedToday) {
 			const today = schedule ? schedule.find( ({ isToday }) => isToday === true ) : undefined
-			
-			operationHours = today ? hoursUtils.getHoursInfo(today.hours.openTimeDigits, today.hours.closeTimeDigits) : undefined
+			operationHoursInfo = today ? hoursUtils.getHoursInfo(today.hours.openTimeDigits, today.hours.closeTimeDigits) : undefined
 
-			openNow = operationHours ? (operationHours.isOpenNow ? YES : NO) : undefined
+			openNow = operationHoursInfo ? (operationHoursInfo.isOpenNow ? YES : NO) : undefined
 			opening = today ? today.hours.openTime : NOT_TODAY
 			closing = today ? today.hours.closeTime : undefined
 		} else {
@@ -157,7 +156,7 @@ function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, opera
 		openNow: openNow,
 		opening: opening,
 		closing: closing,
-		hoursInfo: operationHours,
+		hoursInfo: operationHoursInfo,
 		schedule: schedule
 	}
 }
