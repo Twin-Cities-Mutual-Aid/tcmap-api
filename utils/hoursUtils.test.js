@@ -5,6 +5,30 @@ const hoursUtils = require('./hoursUtils')
 const testHours = require('../testData/hours_response.json')
 
 describe('getHoursInfo', () => {
+    test.each`
+        openStatus        | hours                   | date                             | openTimeDigits | closeTimeDigits | isOpenNow  | openingSoon  | closingSoon 
+        ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 6, 10)}  | ${"1100"}      | ${"1500"}       | ${false}   | ${false}     | ${false}    
+        ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 17, 10)} | ${"1100"}      | ${"1500"}       | ${true}    | ${false}     | ${false}    
+        ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 20, 59)} | ${"1100"}      | ${"1500"}       | ${true}    | ${false}     | ${true}     
+        ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 16, 10)} | ${"1100"}      | ${"1500"}       | ${false}   | ${true}      | ${false}    
+        ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 26, 4, 10)}  | ${"1100"}      | ${"1500"}       | ${false}   | ${false}     | ${false}    
+        ${"not open now"} | ${"has no hours today"} | ${Date.UTC(2021, 1, 26, 20, 10)} | ${undefined}   | ${undefined}    | ${false}   | ${undefined} | ${undefined} 
+        ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${"0000"}      | ${"0000"}       | ${true}    | ${false}     | ${false}     
+        ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 28, 10, 59)} | ${"0000"}      | ${"0000"}       | ${true}    | ${false}     | ${false}     
+    `('should return site as $openStatus when site "$hours" and is $openStatus', ({date, openTimeDigits, closeTimeDigits, isOpenNow, openingSoon, closingSoon}) => {
+        Settings.now = () => date
+
+        const expectedResult = {
+            isOpenNow: isOpenNow,
+            openingSoon: openingSoon,
+            closingSoon: closingSoon
+        }
+        const result = hoursUtils.getHoursInfo(openTimeDigits, closeTimeDigits, testHours)
+        expect(result).toStrictEqual(expectedResult)
+    })
+})
+
+describe('getSchedule', () => {
     const openHours = [
         "recS2hDlNsJgG9Kqn",
         "recSpjdkWPkmzjc95",
@@ -21,26 +45,39 @@ describe('getHoursInfo', () => {
     ]
 
     test.each`
-    openStatus        | hours                   | date                             | isOpenNow  | openingSoon  | closingSoon  | expectedHours
-    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 6, 10)}  | ${false}   | ${false}     | ${false}     | ${getExpectedHours()}
-    ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 17, 10)} | ${true}    | ${false}     | ${false}     | ${getExpectedHours()}
-    ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 20, 59)} | ${true}    | ${false}     | ${true}      | ${getExpectedHours()}
-    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 16, 10)} | ${false}   | ${true}      | ${false}     | ${getExpectedHours()}
-    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 26, 4, 10)}  | ${false}   | ${false}     | ${false}     | ${getExpectedHours()}
-    ${"not open now"} | ${"has no hours today"} | ${Date.UTC(2021, 1, 26, 20, 10)} | ${false}   | ${undefined} | ${undefined} | ${getExpectedHours(false, false, true)}
-    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${true}    | ${false}     | ${false}     | ${getExpectedHours(true, false, false)}
-    ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 28, 10, 59)} | ${true}    | ${false}     | ${false}     | ${getExpectedHours(false, false, false, false, true)}
-    `('should return site as $openStatus with summary when site "$hours" and is $openStatus', ({date, isOpenNow, openingSoon, closingSoon, expectedHours}) => {
+        weekday        | date                             | expectedSchedule
+        ${"Thursday"}  | ${Date.UTC(2021, 1, 25, 6, 10)}  | ${getExpectedSchedule()}
+        ${"Thursday"}  | ${Date.UTC(2021, 1, 25, 17, 10)} | ${getExpectedSchedule()}
+        ${"Thursday"}  | ${Date.UTC(2021, 1, 25, 20, 59)} | ${getExpectedSchedule()}
+        ${"Thursday"}  | ${Date.UTC(2021, 1, 25, 16, 10)} | ${getExpectedSchedule()}
+        ${"Thursday"}  | ${Date.UTC(2021, 1, 26, 4, 10)}  | ${getExpectedSchedule()}
+        ${"Friday"}    | ${Date.UTC(2021, 1, 26, 20, 10)} | ${getExpectedSchedule(false, false, true)}
+        ${"Wednesday"} | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${getExpectedSchedule(true, false, false)}
+        ${"Sunday"}    | ${Date.UTC(2021, 1, 28, 10, 59)} | ${getExpectedSchedule(false, false, false, false, true)}
+    `('should return site scheduled hours when today is $weekday', ({weekday, date, expectedSchedule}) => {
         Settings.now = () => date
 
-        const expectedResult = {
-            isOpenNow: isOpenNow,
-            openingSoon: openingSoon,
-            closingSoon: closingSoon,
-            ...expectedHours
-        }
-        const result = hoursUtils.getHoursInfo(openHours, closeHours, testHours)
-        expect(result).toStrictEqual(expectedResult)
+        const result = hoursUtils.getSchedule(openHours, closeHours, testHours)
+        expect(result).toStrictEqual(expectedSchedule)
+    })
+})
+
+describe('checkIsClosedToday', () => {
+    test.each`
+        description               | date                             | isClosed | closedDates
+        ${"include today"}        | ${Date.UTC(2021, 1, 25, 6, 10)}  | ${true}  |  ${["2021-02-25", "2021-02-01"]}
+        ${"include today"}        | ${Date.UTC(2021, 1, 25, 17, 10)} | ${true}  |  ${["2021-02-25"]}
+        ${"include today"}        | ${Date.UTC(2021, 1, 26, 4, 10)}  | ${true}  |  ${["2021-02-25", "2021-02-01"]}
+        ${"do not include today"} | ${Date.UTC(2021, 1, 26, 20, 10)} | ${false} |  ${["2021-02-25", "2021-02-01"]}
+        ${"do not include today"} | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${false} |  ${["2021-02-25", "2021-02-01"]}
+        ${"do not include today"} | ${Date.UTC(2021, 1, 28, 10, 59)} | ${false} |  ${["2021-02-25", "2021-02-01"]}
+        ${"have malformed date"}  | ${Date.UTC(2021, 1, 28, 10, 59)} | ${false} |  ${["2021-25-02", "02/25/2021", "2021-02"]}
+        ${"are empty"}            | ${Date.UTC(2021, 1, 28, 10, 59)} | ${false} |  ${[]}
+    `('should return site is closed $isClosed when closedDates $description', ({description, date, isClosed, closedDates}) => {
+        Settings.now = () => date
+
+        const result = hoursUtils.checkIsClosedToday(closedDates)
+        expect(result).toStrictEqual(isClosed)
     })
 })
 
@@ -58,14 +95,14 @@ describe('transformHours', () => {
 
 describe('getTodayWeekday', () => {
     test.each`
-    date                             | weekday 
-    ${Date.UTC(2021, 1, 25, 0, 10)}  | ${3} 
-    ${Date.UTC(2021, 1, 25, 6, 0)}   | ${4} 
-    ${Date.UTC(2021, 1, 25, 16, 10)} | ${4}
-    ${Date.UTC(2021, 1, 25, 23, 59)} | ${4}
-    ${Date.UTC(2021, 1, 26, 4, 59)}  | ${4}
-    ${Date.UTC(2021, 1, 26, 6, 0)}   | ${5}
-    ${Date.UTC(2021, 1, 28, 6, 0)}   | ${0}
+        date                             | weekday 
+        ${Date.UTC(2021, 1, 25, 0, 10)}  | ${3} 
+        ${Date.UTC(2021, 1, 25, 6, 0)}   | ${4} 
+        ${Date.UTC(2021, 1, 25, 16, 10)} | ${4}
+        ${Date.UTC(2021, 1, 25, 23, 59)} | ${4}
+        ${Date.UTC(2021, 1, 26, 4, 59)}  | ${4}
+        ${Date.UTC(2021, 1, 26, 6, 0)}   | ${5}
+        ${Date.UTC(2021, 1, 28, 6, 0)}   | ${0}
     `('should return weekday as $weekday when todays date is $date', ({date, weekday}) => {
         Settings.now = () => date
 
@@ -95,7 +132,7 @@ describe('checkIsOpenNow', () => {
     })
 })
 
-function getExpectedHours(
+function getExpectedSchedule(
     wednesdayIsToday = false,
     thursdayIsToday = true,
     fridayIsToday = false,
@@ -104,64 +141,90 @@ function getExpectedHours(
     mondayIsToday = false,
     tuesdayIsToday = false
 ) {
-    return {
-        hours: [
-            {
-                day: 'sunday',
-                dayDigit: 0,
+    return [
+        {
+            day: 'sunday',
+            dayDigit: 0,
+            hours: {
                 openTime: '12:00AM',
+                openTimeDigits: '0000',
                 closeTime: '12:00AM',
-                is24Hours: true,
-                isToday: sundayIsToday,
+                closeTimeDigits: '0000',
             },
-            {
-                day: 'monday',
-                dayDigit: 1,
+            is24Hours: true,
+            isToday: sundayIsToday,
+        },
+        {
+            day: 'monday',
+            dayDigit: 1,
+            hours: {
                 openTime: '11:00AM',
+                openTimeDigits: '1100',
                 closeTime: '3:00PM',
-                is24Hours: false,
-                isToday: mondayIsToday,
+                closeTimeDigits: '1500',
             },
-            {
-                day: 'tuesday',
-                dayDigit: 2,
+            is24Hours: false,
+            isToday: mondayIsToday,
+        },
+        {
+            day: 'tuesday',
+            dayDigit: 2,
+            hours: {
                 openTime: '12:00AM',
+                openTimeDigits: '0000',
                 closeTime: '12:00AM',
-                is24Hours: true,
-                isToday: tuesdayIsToday,
+                closeTimeDigits: '0000',
             },
-            {
-                day: 'wednesday',
-                dayDigit: 3,
+            is24Hours: true,
+            isToday: tuesdayIsToday,
+        },
+        {
+            day: 'wednesday',
+            dayDigit: 3,
+            hours: {
                 openTime: '12:00AM',
+                openTimeDigits: '0000',
                 closeTime: '12:00AM',
-                is24Hours: true,
-                isToday: wednesdayIsToday,
+                closeTimeDigits: '0000',
             },
-            {
-                day: 'thursday',
-                dayDigit: 4,
+            is24Hours: true,
+            isToday: wednesdayIsToday,
+        },
+        {
+            day: 'thursday',
+            dayDigit: 4,
+            hours: {
                 openTime: '11:00AM',
+                openTimeDigits: '1100',
                 closeTime: '3:00PM',
-                is24Hours: false,
-                isToday: thursdayIsToday,
+                closeTimeDigits: '1500',
             },
-            {
-                day: 'friday',
-                dayDigit: 5,
+            is24Hours: false,
+            isToday: thursdayIsToday,
+        },
+        {
+            day: 'friday',
+            dayDigit: 5,
+            hours: {
                 openTime: undefined,
+                openTimeDigits: undefined,
                 closeTime: undefined,
-                is24Hours: false,
-                isToday: fridayIsToday,
+                closeTimeDigits: undefined,
             },
-            {
-                day: 'saturday',
-                dayDigit: 6,
+            is24Hours: false,
+            isToday: fridayIsToday,
+        },
+        {
+            day: 'saturday',
+            dayDigit: 6,
+            hours: {
                 openTime: undefined,
+                openTimeDigits: undefined,
                 closeTime: undefined,
-                is24Hours: false,
-                isToday: saturdayIsToday,
-            }
-        ]
-    }
+                closeTimeDigits: undefined,
+            },
+            is24Hours: false,
+            isToday: saturdayIsToday,
+        }
+    ]
 }
