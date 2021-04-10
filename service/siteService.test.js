@@ -1,13 +1,11 @@
 const airtableClientMock = require('../airtableClient')
 const cacheServiceMock = require('./cacheService')
-// const hoursUtilsMock = require('./hoursUtils')
 const siteService = require('./siteService')
 const { Settings } = require("luxon")
 
 jest.mock('airtable')
 jest.mock('../airtableClient')
 jest.mock('./cacheService')
-// jest.mock('./hoursUtils')
 
 const testSites = require('../testData/sites_response.json')
 const testHours = require('../testData/hours_response.json')

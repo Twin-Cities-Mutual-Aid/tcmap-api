@@ -134,11 +134,9 @@ function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, opera
 	let operationHoursInfo = undefined
 	let schedule = undefined
 	let isEnabled = isOperationEnabled ? true : false
-	
 	if(isOperationEnabled) {
 		schedule = (operationOpenHoursArray && operationCloseHoursArray) ? hoursUtils.getSchedule(operationOpenHoursArray, operationCloseHoursArray, hoursList) : undefined
 		
-
 		const isClosedToday = closedDates ? hoursUtils.checkIsClosedToday(closedDates) : false
 		const hasOpenDates = openDates ? true : false
 		const isOpenToday = hasOpenDates ? hoursUtils.checkIsOpenToday(openDates) : false
