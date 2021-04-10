@@ -10,6 +10,7 @@ module.exports = {
     getSchedule: getSchedule,
     getTodayWeekday: getTodayWeekday,
     checkIsClosedToday: checkIsClosedToday,
+    checkIsOpenToday: checkIsOpenToday,
     checkIsOpenNow: checkIsOpenNow
     
 }
@@ -141,6 +142,16 @@ function checkIsToday(dayDigit) {
 function checkIsClosedToday(closedDates) {
     const today = DateTime.now().toUTC().setZone(AMERICA_CHICAGO).toISODate()
     return closedDates.includes(today)
+}
+
+/**
+ *  Checks if array of open dates includes today 
+ * 
+ *  @param {array} openDates - List of dates in ISO format (i.e. yyyy-MM-dd) when site is exceptionally closed (e.g. holidays, spring break) 
+ */
+ function checkIsOpenToday(openDates) {
+    const today = DateTime.now().toUTC().setZone(AMERICA_CHICAGO).toISODate()
+    return openDates.includes(today)
 }
 
 /**

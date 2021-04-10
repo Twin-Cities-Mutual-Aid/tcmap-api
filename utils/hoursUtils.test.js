@@ -81,6 +81,25 @@ describe('checkIsClosedToday', () => {
     })
 })
 
+describe('checkIsOpenToday', () => {
+    test.each`
+        description               | date                             | isOpen   | openDates
+        ${"include today"}        | ${Date.UTC(2021, 1, 25, 6, 10)}  | ${true}  |  ${["2021-02-25", "2021-02-01"]}
+        ${"include today"}        | ${Date.UTC(2021, 1, 25, 17, 10)} | ${true}  |  ${["2021-02-25"]}
+        ${"include today"}        | ${Date.UTC(2021, 1, 26, 4, 10)}  | ${true}  |  ${["2021-02-25", "2021-02-01"]}
+        ${"do not include today"} | ${Date.UTC(2021, 1, 26, 20, 10)} | ${false} |  ${["2021-02-25", "2021-02-01"]}
+        ${"do not include today"} | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${false} |  ${["2021-02-25", "2021-02-01"]}
+        ${"do not include today"} | ${Date.UTC(2021, 1, 28, 10, 59)} | ${false} |  ${["2021-02-25", "2021-02-01"]}
+        ${"have malformed date"}  | ${Date.UTC(2021, 1, 28, 10, 59)} | ${false} |  ${["2021-25-02", "02/25/2021", "2021-02"]}
+        ${"are empty"}            | ${Date.UTC(2021, 1, 28, 10, 59)} | ${false} |  ${[]}
+    `('should return site is open $isOpen when openDates $description', ({description, date, isOpen, openDates}) => {
+        Settings.now = () => date
+
+        const result = hoursUtils.checkIsOpenToday(openDates)
+        expect(result).toStrictEqual(isOpen)
+    })
+})
+
 describe('transformHours', () => {
     test.each`
         resultDesc                | timeDesc     | time           | expectedResult                          

@@ -1,11 +1,13 @@
 const airtableClientMock = require('../airtableClient')
 const cacheServiceMock = require('./cacheService')
+// const hoursUtilsMock = require('./hoursUtils')
 const siteService = require('./siteService')
 const { Settings } = require("luxon")
 
 jest.mock('airtable')
 jest.mock('../airtableClient')
 jest.mock('./cacheService')
+// jest.mock('./hoursUtils')
 
 const testSites = require('../testData/sites_response.json')
 const testHours = require('../testData/hours_response.json')
@@ -62,6 +64,42 @@ describe("getMutualAidSites", () => {
 
         expect(cacheServiceMock.readCache).toHaveBeenCalled()
         expect(result).toStrictEqual(expectedResult)
+    })
+})
+
+describe('getSiteOperationInfo', () => {
+    const openHours = [
+        "recS2hDlNsJgG9Kqn",
+        "recSpjdkWPkmzjc95",
+        "recSpjdkWPkmzjc96",
+        "recS2hDlNsJgG9Kqm",
+        "rect49hsKqi2NLrO1"
+    ]
+    const closeHours = [
+        "recSpjdkWPkmzjc95",
+        "recSpjdkWPkmzjc96",
+        "rect49hsKqi2NLrOx",
+        "rect49hsKqi2NLrOZ",
+        "rect49hsKqi2NLrO1"
+    ]
+
+    test.each`
+        isEnabled | closedDates       | openDates         | openNow  | opening        | closing     
+        ${false}  | ${undefined}      | ${undefined}      | ${"no"}  | ${"never"}     | ${undefined}
+        ${true}   | ${["2021-02-25"]} | ${["2021-02-25"]} | ${"no"}  | ${"not today"} | ${undefined}
+        ${true}   | ${["2021-02-25"]} | ${undefined}      | ${"no"}  | ${"not today"} | ${undefined}
+        ${true}   | ${["2021-02-10"]} | ${["2021-02-05"]} | ${"no"}  | ${"not today"} | ${undefined}
+        ${true}   | ${["2021-02-10"]} | ${undefined}      | ${"yes"} | ${"11:00AM"}   | ${"3:00PM"} 
+        ${true}   | ${["2021-02-10"]} | ${["2021-02-25"]} | ${"yes"} | ${"11:00AM"}   | ${"3:00PM"} 
+        ${true}   | ${undefined}      | ${["2021-02-25"]} | ${"yes"} | ${"11:00AM"}   | ${"3:00PM"} 
+        ${true}   | ${undefined}      | ${undefined}      | ${"yes"} | ${"11:00AM"}   | ${"3:00PM"} 
+    `('should return $opening $closing', ({isEnabled, closedDates, openDates, opening, closing, openNow, expectedSchedule}) => {
+        Settings.now = () => Date.UTC(2021, 1, 25, 17, 10)
+
+        const result = siteService.getSiteOperationInfo(isEnabled, openHours, closeHours, testHours, closedDates, openDates)
+        expect(result.openNow).toStrictEqual(openNow)
+        expect(result.opening).toStrictEqual(opening)
+        expect(result.closing).toStrictEqual(closing)
     })
 })
 

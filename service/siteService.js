@@ -53,6 +53,7 @@ module.exports = {
 		}
 	},
 
+	getSiteOperationInfo: getSiteOperationInfo,
 	transformPublicTransit: transformPublicTransit,
 	getWarmingSiteStatus: getWarmingSiteStatus
 }
@@ -66,8 +67,8 @@ function validateRecord(record) {
 }
 
 function mapRecordFields(record, hours) {
-	const distributingHours = getDistributingHours(record, hours)
-	const receivingHours = getReceivingHours(record, hours)
+	const distributingHours = getDistributingHours(record.fields, hours)
+	const receivingHours = getReceivingHours(record.fields, hours)
 
 	return {
 		name: record.fields.org_name,
@@ -92,9 +93,9 @@ function mapRecordFields(record, hours) {
 	}
 }
 
-function getDistributingHours(record, hoursRecords) {
-	if(record.fields.automate_hours) {
-		const siteOperationInfo = getSiteOperationInfo(record.fields.distributes, record.fields.distributing_open, record.fields.distributing_close, hoursRecords, record.fields.closed_dates)
+function getDistributingHours(recordFields, hoursRecords) {
+	if(recordFields.automate_hours) {
+		const siteOperationInfo = getSiteOperationInfo(recordFields.distributes, recordFields.distributing_open, recordFields.distributing_close, hoursRecords, recordFields.closed_dates, recordFields.open_dates)
 
 		return {
 			currentlyOpenForDistributing: siteOperationInfo.openNow,
@@ -103,15 +104,15 @@ function getDistributingHours(record, hoursRecords) {
 		}
 	}
 	return {
-		currentlyOpenForDistributing: record.fields.currently_open_for_distributing,
-		openingForDistributingDonations: hoursUtils.transformHours(record.fields.opening_for_distributing),
-		closingForDistributingDonations: hoursUtils.transformHours(record.fields.closing_for_distributing)
+		currentlyOpenForDistributing: recordFields.currently_open_for_distributing,
+		openingForDistributingDonations: hoursUtils.transformHours(recordFields.opening_for_distributing),
+		closingForDistributingDonations: hoursUtils.transformHours(recordFields.closing_for_distributing)
 	}
 }
 
-function getReceivingHours(record, hoursRecords) {
-	if(record.fields.automate_hours) {
-		const siteOperationInfo = getSiteOperationInfo(record.fields.receives, record.fields.receiving_open, record.fields.receiving_close, hoursRecords, record.fields.closed_dates)
+function getReceivingHours(recordFields, hoursRecords) {
+	if(recordFields.automate_hours) {
+		const siteOperationInfo = getSiteOperationInfo(recordFields.receives, recordFields.receiving_open, recordFields.receiving_close, hoursRecords, recordFields.closed_dates, recordFields.open_dates)
 		return {
 			currentlyOpenForReceiving: siteOperationInfo.openNow,
 			openingForReceivingDonations: siteOperationInfo.opening,
@@ -120,30 +121,40 @@ function getReceivingHours(record, hoursRecords) {
 	}
 
 	return {
-		currentlyOpenForReceiving: record.fields.currently_open_for_receiving,
-		openingForReceivingDonations: hoursUtils.transformHours(record.fields.opening_for_receiving),
-		closingForReceivingDonations:  hoursUtils.transformHours(record.fields.closing_for_receiving)
+		currentlyOpenForReceiving: recordFields.currently_open_for_receiving,
+		openingForReceivingDonations: hoursUtils.transformHours(recordFields.opening_for_receiving),
+		closingForReceivingDonations:  hoursUtils.transformHours(recordFields.closing_for_receiving)
 	}
 }
 
-function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, operationCloseHoursArray, hoursList, closedDates) {
+function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, operationCloseHoursArray, hoursList, closedDates, openDates) {
 	let openNow = NO
 	let opening = NEVER
 	let closing = undefined
 	let operationHoursInfo = undefined
 	let schedule = undefined
 	let isEnabled = isOperationEnabled ? true : false
+	
 	if(isOperationEnabled) {
 		schedule = (operationOpenHoursArray && operationCloseHoursArray) ? hoursUtils.getSchedule(operationOpenHoursArray, operationCloseHoursArray, hoursList) : undefined
+		
 
 		const isClosedToday = closedDates ? hoursUtils.checkIsClosedToday(closedDates) : false
+		const hasOpenDates = openDates ? true : false
+		const isOpenToday = hasOpenDates ? hoursUtils.checkIsOpenToday(openDates) : false
 		if(!isClosedToday) {
-			const today = schedule ? schedule.find( ({ isToday }) => isToday === true ) : undefined
-			operationHoursInfo = today ? hoursUtils.getHoursInfo(today.hours.openTimeDigits, today.hours.closeTimeDigits) : undefined
+			if(!hasOpenDates || (hasOpenDates && isOpenToday)) {
+				const today = schedule ? schedule.find( ({ isToday }) => isToday === true ) : undefined
+				operationHoursInfo = today ? hoursUtils.getHoursInfo(today.hours.openTimeDigits, today.hours.closeTimeDigits) : undefined
 
-			openNow = operationHoursInfo ? (operationHoursInfo.isOpenNow ? YES : NO) : undefined
-			opening = today ? today.hours.openTime : NOT_TODAY
-			closing = today ? today.hours.closeTime : undefined
+				openNow = operationHoursInfo ? (operationHoursInfo.isOpenNow ? YES : NO) : undefined
+				opening = today ? today.hours.openTime : NOT_TODAY
+				closing = today ? today.hours.closeTime : undefined
+			} else {
+				openNow = NO
+				opening = NOT_TODAY
+				closing = undefined
+			}
 		} else {
 			openNow = NO
 			opening = NOT_TODAY
