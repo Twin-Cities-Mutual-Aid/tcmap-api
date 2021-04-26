@@ -63,7 +63,7 @@ function validateRecord(record) {
 	const has_lng = record.fields.longitude !== undefined
 	const has_lat = record.fields.latitude !== undefined
 
-	return has_org && has_lng && has_lat 
+    return has_org && has_lng && has_lat 
 }
 
 function mapRecordFields(record, hours) {
@@ -72,11 +72,11 @@ function mapRecordFields(record, hours) {
 
 	return {
 		name: record.fields.org_name,
+		mostRecentlyUpdatedAt: record.fields.last_updated,
 		neighborhood: record.fields.neighborhood_name,
 		address: record.fields.address,
 		longitude: record.fields.longitude,
 		latitude: record.fields.latitude,
-		mostRecentlyUpdatedAt: record.fields.last_updated,
 		...distributingHours,
 		...receivingHours,
 		urgentNeed: record.fields.urgent_need,
@@ -123,51 +123,60 @@ function getReceivingHours(recordFields, hoursRecords) {
 	return {
 		currentlyOpenForReceiving: recordFields.currently_open_for_receiving,
 		openingForReceivingDonations: hoursUtils.transformHours(recordFields.opening_for_receiving),
-		closingForReceivingDonations:  hoursUtils.transformHours(recordFields.closing_for_receiving)
+		closingForReceivingDonations: hoursUtils.transformHours(recordFields.closing_for_receiving)
 	}
 }
 
 function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, operationCloseHoursArray, hoursList, closedDates, openDates) {
-	let openNow = NO
-	let opening = NEVER
-	let closing = undefined
-	let operationHoursInfo = undefined
-	let schedule = undefined
-	let isEnabled = isOperationEnabled ? true : false
-	if(isOperationEnabled) {
-		schedule = (operationOpenHoursArray && operationCloseHoursArray) ? hoursUtils.getSchedule(operationOpenHoursArray, operationCloseHoursArray, hoursList) : undefined
-		
-		const isClosedToday = closedDates ? hoursUtils.checkIsClosedToday(closedDates) : false
-		const hasOpenDates = openDates ? true : false
-		const isOpenToday = hasOpenDates ? hoursUtils.checkIsOpenToday(openDates) : false
-		if(!isClosedToday) {
-			if(!hasOpenDates || (hasOpenDates && isOpenToday)) {
-				const today = schedule ? schedule.find( ({ isToday }) => isToday === true ) : undefined
-				operationHoursInfo = today ? hoursUtils.getHoursInfo(today.hours.openTimeDigits, today.hours.closeTimeDigits) : undefined
+    let openNow = NO
+    let opening = NEVER
+    let closing = undefined
+    let operationHoursInfo = undefined
+    let schedule = undefined
+    let isEnabled = isOperationEnabled ? true : false
+    try {
+        if (isOperationEnabled) {
+            schedule = (operationOpenHoursArray && operationCloseHoursArray) ? hoursUtils.getSchedule(operationOpenHoursArray, operationCloseHoursArray, hoursList) : undefined
 
-				openNow = operationHoursInfo ? (operationHoursInfo.isOpenNow ? YES : NO) : undefined
-				opening = today ? today.hours.openTime : NOT_TODAY
-				closing = today ? today.hours.closeTime : undefined
-			} else {
-				openNow = NO
-				opening = NOT_TODAY
-				closing = undefined
-			}
-		} else {
-			openNow = NO
-			opening = NOT_TODAY
-			closing = undefined
-		}
-	}
-	
-	return {
-		isEnabled: isEnabled,
-		openNow: openNow,
-		opening: opening,
-		closing: closing,
-		hoursInfo: operationHoursInfo,
-		schedule: schedule
-	}
+            const isClosedToday = closedDates ? hoursUtils.checkIsClosedToday(closedDates) : false
+            const hasOpenDates = openDates ? true : false
+            const isOpenToday = hasOpenDates ? hoursUtils.checkIsOpenToday(openDates) : false
+            if (!isClosedToday) {
+                if (!hasOpenDates || (hasOpenDates && isOpenToday)) {
+                    const today = schedule ? schedule.find(({ isToday }) => isToday === true) : undefined
+                    operationHoursInfo = today ? hoursUtils.getHoursInfo(today.hours, today.is24Hours) : undefined
+                    openNow = operationHoursInfo ? (operationHoursInfo.isOpenNow ? YES : NO) : undefined
+                    openingTimes = today ? today.hours.map(period => period.openTime) : NOT_TODAY
+                    closingTimes = today ? today.hours.map(period => period.closeTime) : undefined
+                    opening = openingTimes.length > 0 ? openingTimes : NOT_TODAY
+                    closing = closingTimes.length > 0 ? closingTimes : NOT_TODAY
+                } else {
+                    openNow = NO
+                    opening = NOT_TODAY
+                    closing = undefined
+                }
+            } else {
+                openNow = NO
+                opening = NOT_TODAY
+                closing = undefined
+            }
+        }
+    } catch (exception) {
+        console.log(exception)
+
+        openNow = NO
+        opening = NOT_TODAY
+        closing = undefined
+    }
+
+    return {
+        isEnabled: isEnabled,
+        openNow: openNow,
+        opening: opening,
+        closing: closing,
+        hoursInfo: operationHoursInfo,
+        schedule: schedule
+    }
 }
 
 function getWarmingSiteStatus(automateWarmingSiteStatus, currentlyOpenForDistributing, warmingSite) {
