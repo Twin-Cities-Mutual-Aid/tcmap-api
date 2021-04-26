@@ -63,6 +63,15 @@ describe('getSchedule', () => {
         const result = hoursUtils.getSchedule(openHours, closeHours, testHours)
         expect(result).toStrictEqual(expectedSchedule)
     })
+
+    it('should throw error when opening and closing hours are mismatched', () => {
+        Settings.now = () => Date.UTC(2021, 1, 25, 6, 10)
+        const openHours = ["recS2hDlNsJgG9Kqn"]
+        const closeHours = ["recSpjdkWPkmzjc95", "recSpjdkWPkmzjc96"]
+        expect(() => {
+            hoursUtils.getSchedule(openHours, closeHours, testHours)
+          }).toThrow(Error("Mismatch in number of open and close hours periods"))
+    })
 })
 
 describe('checkIsClosedToday', () => {
