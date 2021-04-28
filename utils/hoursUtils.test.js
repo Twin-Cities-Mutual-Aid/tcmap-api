@@ -6,16 +6,17 @@ const testHours = require('../testData/hours_response.json')
 
 describe('getHoursInfo', () => {
     test.each`
-        openStatus        | hours                   | date                             | openTimeDigits | closeTimeDigits | isOpenNow  | openingSoon  | closingSoon 
-        ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 6, 10)}  | ${"1100"}      | ${"1500"}       | ${false}   | ${false}     | ${false}    
-        ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 17, 10)} | ${"1100"}      | ${"1500"}       | ${true}    | ${false}     | ${false}    
-        ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 20, 59)} | ${"1100"}      | ${"1500"}       | ${true}    | ${false}     | ${true}     
-        ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 16, 10)} | ${"1100"}      | ${"1500"}       | ${false}   | ${true}      | ${false}    
-        ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 26, 4, 10)}  | ${"1100"}      | ${"1500"}       | ${false}   | ${false}     | ${false}    
-        ${"not open now"} | ${"has no hours today"} | ${Date.UTC(2021, 1, 26, 20, 10)} | ${undefined}   | ${undefined}    | ${false}   | ${undefined} | ${undefined} 
-        ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${"0000"}      | ${"0000"}       | ${true}    | ${false}     | ${false}     
-        ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 28, 10, 59)} | ${"0000"}      | ${"0000"}       | ${true}    | ${false}     | ${false}     
-    `('should return site as $openStatus when site "$hours" and is $openStatus', ({date, openTimeDigits, closeTimeDigits, isOpenNow, openingSoon, closingSoon}) => {
+    openStatus        | hoursDescription        | date                             | is24Hours | isOpenNow  | openingSoon   | closingSoon | hours 
+    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 6, 10)}  | ${false}  | ${false}   | ${false}      | ${false}    | ${[{ openTime: "11:00AM", openTimeDigits: "1100", closeTime: "3:00PM", closeTimeDigits: "1500" }]}
+    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 6, 10)}  | ${false}  | ${true}   | ${false}      | ${false}    | ${[{ openTime: "11:00AM", openTimeDigits: "1100", closeTime: "3:00PM", closeTimeDigits: "1500" }, { openTime: "12:05AM", openTimeDigits: "0005", closeTime: "3:00AM", closeTimeDigits: "0300" }]}
+    ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 17, 10)} | ${false}  | ${true}    | ${false}      | ${false}     | ${[{ openTime: "11:00AM", openTimeDigits: "1100", closeTime: "3:00PM", closeTimeDigits: "1500" }]}
+    ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 20, 59)} | ${false}  | ${true}    | ${false}      | ${true}      | ${[{ openTime: "11:00AM", openTimeDigits: "1100", closeTime: "3:00PM", closeTimeDigits: "1500" }]}
+    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 16, 10)} | ${false}  | ${false}   | ${true}       | ${false}     | ${[{ openTime: "11:00AM", openTimeDigits: "1100", closeTime: "3:00PM", closeTimeDigits: "1500" }]}
+    ${"not open now"} | ${"has hours today"}    | ${Date.UTC(2021, 1, 26, 4, 10)}  | ${false}  | ${false}   | ${false}      | ${false}     | ${[{ openTime: "11:00AM", openTimeDigits: "1100", closeTime: "3:00PM", closeTimeDigits: "1500" }]}
+    ${"not open now"} | ${"has no hours today"} | ${Date.UTC(2021, 1, 26, 20, 10)} | ${false}  | ${false}   | ${undefined}  | ${undefined} | ${[]} 
+    ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 25, 5, 10)}  | ${true}   | ${true}    | ${false}      | ${false}     | ${[{ openTime: "12:00AM", openTimeDigits: "0000", closeTime: "12:00PM", closeTimeDigits: "0000" }]} 
+    ${"open now"}     | ${"has hours today"}    | ${Date.UTC(2021, 1, 28, 10, 59)} | ${true}   | ${true}    | ${false}      | ${false}     | ${[{ openTime: "12:00AM", openTimeDigits: "0000", closeTime: "12:00PM", closeTimeDigits: "0000" }]} 
+    `('should return site as $openStatus when site "$hoursDescription" and is $openStatus', ({date, is24Hours, isOpenNow, openingSoon, closingSoon, hours}) => {
         Settings.now = () => date
 
         const expectedResult = {
@@ -23,7 +24,7 @@ describe('getHoursInfo', () => {
             openingSoon: openingSoon,
             closingSoon: closingSoon
         }
-        const result = hoursUtils.getHoursInfo(openTimeDigits, closeTimeDigits, testHours)
+        const result = hoursUtils.getHoursInfo(hours, is24Hours)
         expect(result).toStrictEqual(expectedResult)
     })
 })
@@ -34,14 +35,16 @@ describe('getSchedule', () => {
         "recSpjdkWPkmzjc95",
         "recSpjdkWPkmzjc96",
         "recS2hDlNsJgG9Kqm",
-        "rect49hsKqi2NLrO1"
+        "rect49hsKqi2NLrO1",
+        "rect49hsKqi2NLrO3"
     ]
     const closeHours = [
         "recSpjdkWPkmzjc95",
         "recSpjdkWPkmzjc96",
         "rect49hsKqi2NLrOx",
         "rect49hsKqi2NLrOZ",
-        "rect49hsKqi2NLrO1"
+        "rect49hsKqi2NLrO1",
+        "rect49hsKqi2NLrO4"
     ]
 
     test.each`
@@ -59,6 +62,15 @@ describe('getSchedule', () => {
 
         const result = hoursUtils.getSchedule(openHours, closeHours, testHours)
         expect(result).toStrictEqual(expectedSchedule)
+    })
+
+    it('should throw error when opening and closing hours are mismatched', () => {
+        Settings.now = () => Date.UTC(2021, 1, 25, 6, 10)
+        const openHours = ["recS2hDlNsJgG9Kqn"]
+        const closeHours = ["recSpjdkWPkmzjc95", "recSpjdkWPkmzjc96"]
+        expect(() => {
+            hoursUtils.getSchedule(openHours, closeHours, testHours)
+          }).toThrow(Error("Mismatch in number of open and close hours periods"))
     })
 })
 
@@ -103,8 +115,8 @@ describe('checkIsOpenToday', () => {
 describe('transformHours', () => {
     test.each`
         resultDesc                | timeDesc     | time           | expectedResult                          
-        ${"formatted 12hour time"}| ${"morning"} | ${"1000"}      | ${"10:00AM"}    
-        ${"formatted 12hour time"}| ${"evening"} | ${"1900"}      | ${"7:00PM"}    
+        ${"formatted 12hour time"}| ${"morning"} | ${"1000"}      | ${["10:00AM"]}    
+        ${"formatted 12hour time"}| ${"evening"} | ${"1900"}      | ${["7:00PM"]}    
         ${"not today"}            | ${"not"}     | ${"not today"} | ${"not today"}    
     `('should return $resultDesc when time is $timeDesc number', ({time, expectedResult}) => {
         let result = hoursUtils.transformHours(time)
@@ -164,84 +176,90 @@ function getExpectedSchedule(
         {
             day: 'sunday',
             dayDigit: 0,
-            hours: {
-                openTime: '12:00AM',
-                openTimeDigits: '0000',
-                closeTime: '12:00AM',
-                closeTimeDigits: '0000',
-            },
+            hours: [
+                {
+                    openTime: '12:00AM',
+                    openTimeDigits: '0000',
+                    closeTime: '12:00AM',
+                    closeTimeDigits: '0000',
+                },
+            ],
             is24Hours: true,
             isToday: sundayIsToday,
         },
         {
             day: 'monday',
             dayDigit: 1,
-            hours: {
-                openTime: '11:00AM',
-                openTimeDigits: '1100',
-                closeTime: '3:00PM',
-                closeTimeDigits: '1500',
-            },
+            hours: [
+                {
+                    openTime: '11:00AM',
+                    openTimeDigits: '1100',
+                    closeTime: '3:00PM',
+                    closeTimeDigits: '1500',
+                },
+                {
+                    openTime: '5:00PM',
+                    openTimeDigits: '1700',
+                    closeTime: '7:00PM',
+                    closeTimeDigits: '1900',
+                },
+            ],
             is24Hours: false,
             isToday: mondayIsToday,
         },
         {
             day: 'tuesday',
             dayDigit: 2,
-            hours: {
-                openTime: '12:00AM',
-                openTimeDigits: '0000',
-                closeTime: '12:00AM',
-                closeTimeDigits: '0000',
-            },
+            hours: [
+                {
+                    openTime: '12:00AM',
+                    openTimeDigits: '0000',
+                    closeTime: '12:00AM',
+                    closeTimeDigits: '0000',
+                },
+            ],
             is24Hours: true,
             isToday: tuesdayIsToday,
         },
         {
             day: 'wednesday',
             dayDigit: 3,
-            hours: {
-                openTime: '12:00AM',
-                openTimeDigits: '0000',
-                closeTime: '12:00AM',
-                closeTimeDigits: '0000',
-            },
+            hours: [
+                {
+                    openTime: '12:00AM',
+                    openTimeDigits: '0000',
+                    closeTime: '12:00AM',
+                    closeTimeDigits: '0000',
+                },
+            ],
             is24Hours: true,
             isToday: wednesdayIsToday,
         },
         {
             day: 'thursday',
             dayDigit: 4,
-            hours: {
-                openTime: '11:00AM',
-                openTimeDigits: '1100',
-                closeTime: '3:00PM',
-                closeTimeDigits: '1500',
-            },
+            hours: [
+                {
+                    openTime: '11:00AM',
+                    openTimeDigits: '1100',
+                    closeTime: '3:00PM',
+                    closeTimeDigits: '1500',
+                },
+            ],
             is24Hours: false,
             isToday: thursdayIsToday,
         },
         {
             day: 'friday',
             dayDigit: 5,
-            hours: {
-                openTime: undefined,
-                openTimeDigits: undefined,
-                closeTime: undefined,
-                closeTimeDigits: undefined,
-            },
+            hours: [],
             is24Hours: false,
             isToday: fridayIsToday,
         },
         {
             day: 'saturday',
             dayDigit: 6,
-            hours: {
-                openTime: undefined,
-                openTimeDigits: undefined,
-                closeTime: undefined,
-                closeTimeDigits: undefined,
-            },
+            hours: [],
             is24Hours: false,
             isToday: saturdayIsToday,
         }
