@@ -146,8 +146,8 @@ function getSiteOperationInfo(isOperationEnabled, operationOpenHoursArray, opera
                     const today = schedule ? schedule.find(({ isToday }) => isToday === true) : undefined
                     operationHoursInfo = today ? hoursUtils.getHoursInfo(today.hours, today.is24Hours) : undefined
                     openNow = operationHoursInfo ? (operationHoursInfo.isOpenNow ? YES : NO) : undefined
-                    openingTimes = today ? today.hours.map(period => period.openTime) : NOT_TODAY
-                    closingTimes = today ? today.hours.map(period => period.closeTime) : undefined
+                    openingTimes = today ? today.hours.map(period => period.openTime) : []
+                    closingTimes = today ? today.hours.map(period => period.closeTime) : []
                     opening = openingTimes.length > 0 ? openingTimes : NOT_TODAY
                     closing = closingTimes.length > 0 ? closingTimes : NOT_TODAY
                 } else {
